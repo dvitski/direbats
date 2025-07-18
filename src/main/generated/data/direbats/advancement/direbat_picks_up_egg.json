@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:adventure/root",
+  "criteria": {
+    "pick_up_egg": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "direbats:direbat"
+            }
+          }
+        ],
+        "item": {
+          "items": "#direbats:direbat_picks_up_egg_advancement_items"
+        },
+        "player": []
+      },
+      "trigger": "minecraft:thrown_item_picked_up_by_entity"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.adventure.direbats:direbat_picks_up_egg.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:egg"
+    },
+    "title": {
+      "translate": "advancements.adventure.direbats:direbat_picks_up_egg.title"
+    }
+  },
+  "requirements": [
+    [
+      "pick_up_egg"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

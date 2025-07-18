@@ -19,7 +19,7 @@ object DirebatsSoundEvents {
 
     private fun registerEntity(entity: EntityType<*>, id: String): SoundEvent {
         val identifier = Registries.ENTITY_TYPE.getId(entity)
-        val soundIdentifier = Identifier(identifier.namespace, "entity.${identifier.path}.$id")
+        val soundIdentifier = Identifier.of(identifier.namespace, "entity.${identifier.path}.$id")
         return Registry.register(Registries.SOUND_EVENT, soundIdentifier, SoundEvent.of(soundIdentifier))
     }
 }

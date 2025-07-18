@@ -10,8 +10,9 @@ import net.minecraft.entity.effect.StatusEffects
 import net.minecraft.entity.mob.MobEntity
 import net.minecraft.entity.projectile.PersistentProjectileEntity
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
 import net.minecraft.particle.ParticleTypes
+import net.minecraft.storage.ReadView
+import net.minecraft.storage.WriteView
 import net.minecraft.world.World
 
 /**
@@ -22,14 +23,13 @@ class DirebatFangArrowEntity : PersistentProjectileEntity {
     private var duration = 300
 
     constructor(entityType: EntityType<out DirebatFangArrowEntity>, world: World) : super(entityType, world)
-    constructor(world: World, owner: LivingEntity) : super(DirebatsEntityTypes.DIREBAT_FANG_ARROW, owner, world)
-    constructor(world: World, x: Double, y: Double, z: Double) : super(DirebatsEntityTypes.DIREBAT_FANG_ARROW, x, y, z, world)
+    constructor(world: World, owner: LivingEntity, stack: ItemStack, shotFrom: ItemStack?) : super(DirebatsEntityTypes.DIREBAT_FANG_ARROW, owner, world, stack, shotFrom)
 
     override fun tick() {
         super.tick()
 
         if (world.isClient) {
-            if (inGround) {
+            if (isInGround) {
                 if (inGroundTime % 5 == 0) {
                     spawnParticles(1)
                 }
@@ -40,14 +40,8 @@ class DirebatFangArrowEntity : PersistentProjectileEntity {
     }
 
     private fun spawnParticles(amount: Int) {
-        val color = StatusEffects.BLINDNESS.color
-        if (color != -1 && amount > 0) {
-            val r = (color shr 16 and 0xFF) / 255.0
-            val g = (color shr 8 and 0xFF) / 255.0
-            val b = (color and 0xFF) / 255.0
-            for (i in 1..amount) {
-                world.addParticle(ParticleTypes.ENTITY_EFFECT, getParticleX(0.5), this.randomBodyY, getParticleZ(0.5), r, g, b)
-            }
+        (0 until amount).forEach { _ ->
+            world.addParticleClient(ParticleTypes.INSTANT_EFFECT, x, y, z, 0.0, 0.0, 0.0)
         }
     }
 
@@ -73,20 +67,20 @@ class DirebatFangArrowEntity : PersistentProjectileEntity {
         }
     }
 
-    override fun asItemStack(): ItemStack {
+    override fun getDefaultItemStack(): ItemStack {
         return ItemStack(DirebatsItems.DIREBAT_FANG_ARROW)
     }
 
     /* NBT */
 
-    override fun writeCustomDataToNbt(nbt: NbtCompound) {
-        super.writeCustomDataToNbt(nbt)
-        nbt.putInt(DURATION_KEY, duration)
+    override fun writeCustomData(view: WriteView) {
+        super.writeCustomData(view)
+        view.putInt(DURATION_KEY, duration)
     }
 
-    override fun readCustomDataFromNbt(nbt: NbtCompound) {
-        super.readCustomDataFromNbt(nbt)
-        duration = nbt.getInt(DURATION_KEY)
+    override fun readCustomData(view: ReadView) {
+        super.readCustomData(view)
+        duration = view.getInt(DURATION_KEY, 300)
     }
 
     companion object {

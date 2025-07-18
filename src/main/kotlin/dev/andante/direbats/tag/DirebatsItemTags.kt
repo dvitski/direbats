@@ -18,6 +18,6 @@ object DirebatsItemTags {
     val DIREBAT_PICKS_UP_EGG_ADVANCEMENT_ITEMS = register("direbat_picks_up_egg_advancement_items")
 
     private fun register(id: String): TagKey<Item> {
-        return TagKey.of(RegistryKeys.ITEM, Identifier(Direbats.MOD_ID, id))
+        return TagKey.of(RegistryKeys.ITEM, Identifier.of(Direbats.MOD_ID, id))
     }
 }

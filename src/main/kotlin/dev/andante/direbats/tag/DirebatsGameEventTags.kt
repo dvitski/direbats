@@ -13,6 +13,6 @@ object DirebatsGameEventTags {
     val DIREBAT_CAN_LISTEN = register("direbat_can_listen")
 
     private fun register(id: String): TagKey<GameEvent> {
-        return TagKey.of(RegistryKeys.GAME_EVENT, Identifier(Direbats.MOD_ID, id))
+        return TagKey.of(RegistryKeys.GAME_EVENT, Identifier.of(Direbats.MOD_ID, id))
     }
 }

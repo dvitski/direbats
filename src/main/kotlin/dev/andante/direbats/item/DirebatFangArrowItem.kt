@@ -12,7 +12,7 @@ import net.minecraft.world.World
  * @see [DirebatsItems.DIREBAT_FANG_ARROW]
  */
 class DirebatFangArrowItem(settings: Settings) : ArrowItem(settings) {
-    override fun createArrow(world: World, stack: ItemStack, shooter: LivingEntity): PersistentProjectileEntity {
-        return DirebatFangArrowEntity(world, shooter)
+    override fun createArrow(world: World, stack: ItemStack, shooter: LivingEntity, shotFrom: ItemStack?): PersistentProjectileEntity {
+        return DirebatFangArrowEntity(world, shooter, stack.copyWithCount(1), shotFrom)
     }
 }

@@ -1,9 +1,8 @@
 import com.matthewprenger.cursegradle.CurseArtifact
 import com.matthewprenger.cursegradle.CurseProject
 import com.matthewprenger.cursegradle.CurseRelation
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.kohsuke.github.GitHub
 import org.kohsuke.github.GHReleaseBuilder
+import org.kohsuke.github.GitHub
 
 buildscript {
     dependencies {
@@ -53,8 +52,6 @@ tasks {
         options.release.set(javaVersionString.toInt())
     }
 
-    withType<KotlinCompile> { kotlinOptions { jvmTarget = javaVersionString } }
-
     java {
         toolchain { languageVersion.set(JavaLanguageVersion.of(javaVersionString)) }
         sourceCompatibility = javaVersion
@@ -71,7 +68,15 @@ tasks {
 val generatedResourcesDir = "src/main/generated"
 
 loom {
+    splitEnvironmentSourceSets()
     accessWidenerPath.set(file("src/main/resources/$modId.accesswidener"))
+
+    mods {
+        create(modId) {
+            sourceSet(sourceSets["main"])
+            sourceSet(sourceSets["client"])
+        }
+    }
 
     runs {
         create("Data Generation") {
@@ -82,6 +87,17 @@ loom {
             vmArg("-Dfabric-api.datagen.modid=$modId")
 
             runDir("build/datagen")
+        }
+
+        create("Data Generation Client") {
+            client()
+
+            vmArg("-Dfabric-api.datagen")
+            vmArg("-Dfabric-api.datagen.output-dir=${file(generatedResourcesDir)}")
+            vmArg("-Dfabric-api.datagen.modid=$modId")
+
+            runDir("build/datagen")
+            source(sourceSets["client"])
         }
     }
 }

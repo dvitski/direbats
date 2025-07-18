@@ -13,6 +13,6 @@ object DirebatsEntityTypeTags {
     val DIREBAT_FANG_ARROW_EFFECTS_IMMUNE = register("direbat_fang_arrow_effects_immune")
 
     private fun register(id: String): TagKey<EntityType<*>> {
-        return TagKey.of(RegistryKeys.ENTITY_TYPE, Identifier(Direbats.MOD_ID, id))
+        return TagKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(Direbats.MOD_ID, id))
     }
 }

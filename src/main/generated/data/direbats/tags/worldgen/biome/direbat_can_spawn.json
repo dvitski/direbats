@@ -1,7 +1,6 @@
 {
-  "replace": false,
   "values": [
-    "#c:forest",
-    "#c:taiga"
+    "#c:is_forest",
+    "#c:is_taiga"
   ]
 }

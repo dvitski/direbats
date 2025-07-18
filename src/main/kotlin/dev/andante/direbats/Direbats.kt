@@ -20,7 +20,9 @@ object Direbats : ModInitializer {
         LOGGER.info("Initializing $MOD_NAME")
 
         DirebatsGameRules
-        DirebatsItemTags; DirebatsEntityTypes; DirebatsGameEventTags
+        DirebatsItemTags
+        DirebatsEntityTypes
+        DirebatsGameEventTags
         DirebatsItemGroups
         DirebatsItems
         DirebatsSoundEvents

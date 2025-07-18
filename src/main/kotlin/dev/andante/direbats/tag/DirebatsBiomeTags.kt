@@ -13,6 +13,6 @@ object DirebatsBiomeTags {
     val DIREBAT_CAN_SPAWN = register("direbat_can_spawn")
 
     private fun register(id: String): TagKey<Biome> {
-        return TagKey.of(RegistryKeys.BIOME, Identifier(Direbats.MOD_ID, id))
+        return TagKey.of(RegistryKeys.BIOME, Identifier.of(Direbats.MOD_ID, id))
     }
 }
