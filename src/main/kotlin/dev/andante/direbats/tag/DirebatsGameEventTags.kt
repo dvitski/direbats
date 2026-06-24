@@ -1,10 +1,10 @@
 package dev.andante.direbats.tag
 
 import dev.andante.direbats.Direbats
-import net.minecraft.registry.RegistryKeys
-import net.minecraft.registry.tag.TagKey
-import net.minecraft.util.Identifier
-import net.minecraft.world.event.GameEvent
+import net.minecraft.core.registries.Registries
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.tags.TagKey
+import net.minecraft.world.level.gameevent.GameEvent
 
 object DirebatsGameEventTags {
     /**
@@ -13,6 +13,6 @@ object DirebatsGameEventTags {
     val DIREBAT_CAN_LISTEN = register("direbat_can_listen")
 
     private fun register(id: String): TagKey<GameEvent> {
-        return TagKey.of(RegistryKeys.GAME_EVENT, Identifier.of(Direbats.MOD_ID, id))
+        return TagKey.create(Registries.GAME_EVENT, ResourceLocation.fromNamespaceAndPath(Direbats.MOD_ID, id))
     }
 }

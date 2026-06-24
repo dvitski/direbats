@@ -8,67 +8,67 @@ import dev.andante.direbats.tag.DirebatsItemTags
 import dev.andante.direbats.world.DirebatsGameRules
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.block.Block
-import net.minecraft.block.BlockState
-import net.minecraft.block.FallingBlock
-import net.minecraft.block.ShapeContext
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityStatuses
-import net.minecraft.entity.EntityType
-import net.minecraft.entity.EquipmentSlot
-import net.minecraft.entity.ItemEntity
-import net.minecraft.entity.LivingEntity
-import net.minecraft.entity.MovementType
-import net.minecraft.entity.SpawnReason
-import net.minecraft.entity.ai.AboveGroundTargeting
-import net.minecraft.entity.ai.NoPenaltySolidTargeting
-import net.minecraft.entity.ai.control.FlightMoveControl
-import net.minecraft.entity.ai.goal.ActiveTargetGoal
-import net.minecraft.entity.ai.goal.AttackGoal
-import net.minecraft.entity.ai.goal.Goal
-import net.minecraft.entity.ai.goal.RevengeGoal
-import net.minecraft.entity.ai.pathing.BirdNavigation
-import net.minecraft.entity.ai.pathing.EntityNavigation
-import net.minecraft.entity.ai.pathing.PathNodeType
-import net.minecraft.entity.attribute.DefaultAttributeContainer
-import net.minecraft.entity.attribute.EntityAttributes
-import net.minecraft.entity.damage.DamageSource
-import net.minecraft.entity.data.DataTracker
-import net.minecraft.entity.data.TrackedData
-import net.minecraft.entity.data.TrackedDataHandlerRegistry
-import net.minecraft.entity.effect.StatusEffectInstance
-import net.minecraft.entity.effect.StatusEffects
-import net.minecraft.entity.mob.PathAwareEntity
-import net.minecraft.entity.passive.BatEntity
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.item.ItemStack
-import net.minecraft.particle.ItemStackParticleEffect
-import net.minecraft.particle.ParticleTypes
-import net.minecraft.predicate.entity.EntityPredicates
-import net.minecraft.registry.entry.RegistryEntry
-import net.minecraft.registry.tag.ItemTags
-import net.minecraft.registry.tag.TagKey
-import net.minecraft.server.world.ServerWorld
-import net.minecraft.sound.SoundEvent
-import net.minecraft.storage.ReadView
-import net.minecraft.storage.WriteView
-import net.minecraft.util.Hand
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
-import net.minecraft.util.math.Direction
-import net.minecraft.util.math.Vec3d
-import net.minecraft.util.math.random.Random
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.core.Holder
+import net.minecraft.core.component.DataComponents
+import net.minecraft.core.particles.ItemParticleOption
+import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.network.syncher.EntityDataAccessor
+import net.minecraft.network.syncher.EntityDataSerializers
+import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.tags.ItemTags
+import net.minecraft.tags.TagKey
+import net.minecraft.util.RandomSource
 import net.minecraft.world.Difficulty
-import net.minecraft.world.ServerWorldAccess
-import net.minecraft.world.World
-import net.minecraft.world.WorldEvents
-import net.minecraft.world.WorldView
-import net.minecraft.world.event.EntityPositionSource
-import net.minecraft.world.event.GameEvent
-import net.minecraft.world.event.PositionSource
-import net.minecraft.world.event.Vibrations
-import net.minecraft.world.event.listener.EntityGameEventHandler
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.damagesource.DamageSource
+import net.minecraft.world.effect.MobEffectInstance
+import net.minecraft.world.effect.MobEffects
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EntityEvent
+import net.minecraft.world.entity.EntitySelector
+import net.minecraft.world.entity.EntitySpawnReason
+import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.MoverType
+import net.minecraft.world.entity.PathfinderMob
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier
+import net.minecraft.world.entity.ai.attributes.Attributes
+import net.minecraft.world.entity.ai.control.FlyingMoveControl
+import net.minecraft.world.entity.ai.goal.Goal
+import net.minecraft.world.entity.ai.goal.OcelotAttackGoal
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation
+import net.minecraft.world.entity.ai.navigation.PathNavigation
+import net.minecraft.world.entity.ai.util.AirAndWaterRandomPos
+import net.minecraft.world.entity.ai.util.HoverRandomPos
+import net.minecraft.world.entity.ambient.Bat
+import net.minecraft.world.entity.item.ItemEntity
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.LevelReader
+import net.minecraft.world.level.ServerLevelAccessor
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.FallingBlock
+import net.minecraft.world.level.block.LevelEvent
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.gameevent.DynamicGameEventListener
+import net.minecraft.world.level.gameevent.EntityPositionSource
+import net.minecraft.world.level.gameevent.GameEvent
+import net.minecraft.world.level.gameevent.PositionSource
+import net.minecraft.world.level.gameevent.vibrations.VibrationSystem
+import net.minecraft.world.level.pathfinder.PathType
+import net.minecraft.world.level.storage.ValueInput
+import net.minecraft.world.level.storage.ValueOutput
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
+import net.minecraft.world.phys.shapes.CollisionContext
 import java.util.EnumSet
 import java.util.function.BiConsumer
 import java.util.function.Predicate
@@ -77,7 +77,8 @@ import java.util.function.Predicate
  * Represents a Direbat entity.
  * @see [DirebatsEntityTypes.DIREBAT]
  */
-class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) : PathAwareEntity(entityType, world), Vibrations {
+class DirebatEntity(entityType: EntityType<out PathfinderMob>, world: Level) : PathfinderMob(entityType, world),
+    VibrationSystem {
     /**
      * Cooldown for a Direbat picking up items.
      */
@@ -101,7 +102,7 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
     /**
      * Vibration listener.
      */
-    val gameEventHandler = EntityGameEventHandler(Vibrations.VibrationListener(this))
+    val gameEventHandler = DynamicGameEventListener(VibrationSystem.Listener(this))
 
     /**
      * Whether a Direbat can hang in its current context.
@@ -119,69 +120,69 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
             }
 
             // check position
-            return canHangAt(blockPos, world, this, avoidsFallingBlocks)
+            return canHangAt(blockPosition(), level(), this, avoidsFallingBlocks)
         }
 
     /**
      * Whether a Direbat is currently hanging.
      */
     var hanging: Boolean
-        get() = dataTracker.get(HANGING)
-        set(value) = dataTracker.set(HANGING, value)
+        get() = entityData.get(HANGING)
+        set(value) = entityData.set(HANGING, value)
 
     /**
      * How long a Direbat has been eating for.
      */
     var eatingTime: Int
-        get() = dataTracker.get(EATING_TIME)
-        set(value) = dataTracker.set(EATING_TIME, value)
+        get() = entityData.get(EATING_TIME)
+        set(value) = entityData.set(EATING_TIME, value)
 
-    private var vibrationData = Vibrations.ListenerData()
+    private var vibrationData = VibrationSystem.Data()
 
     init {
         // movement and pathfinding
-        moveControl = FlightMoveControl(this, 20, true)
-        setPathfindingPenalty(PathNodeType.DANGER_FIRE, -1.0f)
-        setPathfindingPenalty(PathNodeType.WATER, -1.0f)
-        setPathfindingPenalty(PathNodeType.WATER_BORDER, 16.0f)
-        setPathfindingPenalty(PathNodeType.STICKY_HONEY, -1.0f)
-        setPathfindingPenalty(PathNodeType.COCOA, -1.0f)
-        setPathfindingPenalty(PathNodeType.FENCE, -1.0f)
+        moveControl = FlyingMoveControl(this, 20, true)
+        setPathfindingMalus(PathType.DANGER_FIRE, -1.0f)
+        setPathfindingMalus(PathType.WATER, -1.0f)
+        setPathfindingMalus(PathType.WATER_BORDER, 16.0f)
+        setPathfindingMalus(PathType.STICKY_HONEY, -1.0f)
+        setPathfindingMalus(PathType.COCOA, -1.0f)
+        setPathfindingMalus(PathType.FENCE, -1.0f)
 
         // loot
         setCanPickUpLoot(true)
-        experiencePoints = 5
+        xpReward = 5
     }
 
-    override fun initDataTracker(builder: DataTracker.Builder) {
-        super.initDataTracker(builder)
-        builder.add(HANGING, false)
-        builder.add(EATING_TIME, -1)
+    override fun defineSynchedData(builder: SynchedEntityData.Builder) {
+        super.defineSynchedData(builder)
+        builder.define(HANGING, false)
+        builder.define(EATING_TIME, -1)
     }
 
-    override fun initGoals() {
-        targetSelector.add(0, RevengeGoal(this))
-        targetSelector.add(1, DirebatTargetGoal(this, PlayerEntity::class.java))
+    override fun registerGoals() {
+        targetSelector.addGoal(0, HurtByTargetGoal(this))
+        targetSelector.addGoal(1, DirebatTargetGoal(this, Player::class.java))
 
-        goalSelector.add(1, AttackGoal(this))
-        goalSelector.add(2, DirebatItemPickupGoal(this))
-        goalSelector.add(3, DirebatWanderGoal(this))
+        goalSelector.addGoal(1, OcelotAttackGoal(this))
+        goalSelector.addGoal(2, DirebatItemPickupGoal(this))
+        goalSelector.addGoal(3, DirebatWanderGoal(this))
     }
 
-    override fun createNavigation(world: World): EntityNavigation {
-        val navigation = object : BirdNavigation(this, world) {
-            override fun isValidPosition(pos: BlockPos): Boolean {
-                return !world.getBlockState(pos.down()).isAir
+    override fun createNavigation(world: Level): PathNavigation {
+        val navigation = object : FlyingPathNavigation(this, world) {
+            override fun isStableDestination(pos: BlockPos): Boolean {
+                return !world.getBlockState(pos.below()).isAir
             }
         }
 
-        navigation.setCanSwim(false)
+        navigation.setCanFloat(false)
         navigation.setCanOpenDoors(true)
 
         return navigation
     }
 
-    override fun isDisallowedInPeaceful(): Boolean {
+    override fun shouldDespawnInPeaceful(): Boolean {
         return true
     }
 
@@ -195,42 +196,42 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
     /**
      * Makes it so that push away collision only happens when hanging.
      */
-    override fun pushAwayFrom(entity: Entity) {
+    override fun push(entity: Entity) {
         if (hanging) {
-            super.pushAwayFrom(entity)
+            super.push(entity)
         }
     }
 
     /**
      * Cancels ground effects.
      */
-    override fun fall(heightDifference: Double, onGround: Boolean, state: BlockState, landedPosition: BlockPos) {
+    override fun checkFallDamage(heightDifference: Double, onGround: Boolean, state: BlockState, landedPosition: BlockPos) {
     }
 
     /**
      * Makes so that the Direbat cannot despawn if it is holding an item.
      */
-    override fun cannotDespawn(): Boolean {
-        return super.cannotDespawn() || !mainHandStack.isEmpty
+    override fun requiresCustomPersistence(): Boolean {
+        return super.requiresCustomPersistence() || !mainHandItem.isEmpty
     }
 
     /**
      * Always drop the held stack.
      */
-    override fun dropInventory(world: ServerWorld) {
-        super.dropInventory(world)
+    override fun dropEquipment(world: ServerLevel) {
+        super.dropEquipment(world)
 
-        val stack = mainHandStack
+        val stack = mainHandItem
         if (!stack.isEmpty) {
-            dropStack(world, stack)
-            setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY)
+            spawnAtLocation(world, stack)
+            setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY)
         }
     }
 
     /**
      * Handles picking up of items.
      */
-    override fun loot(world: ServerWorld, entity: ItemEntity) {
+    override fun pickUpItem(world: ServerLevel, entity: ItemEntity) {
         if (!world.gameRules.getBoolean(DirebatsGameRules.DO_DIREBAT_ITEM_PICKUP)) {
             return
         }
@@ -239,11 +240,11 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
             return
         }
 
-        if (mainHandStack.isEmpty && !hanging && PICKABLE_DROP_FILTER.test(entity)) {
-            val stack: ItemStack = entity.stack
-            equipLootStack(EquipmentSlot.MAINHAND, stack)
-            sendPickup(entity, stack.count)
-            triggerItemPickedUpByEntityCriteria(entity)
+        if (mainHandItem.isEmpty && !hanging && PICKABLE_DROP_FILTER.test(entity)) {
+            val stack: ItemStack = entity.item
+            setItemSlotAndDropWhenKilled(EquipmentSlot.MAINHAND, stack)
+            take(entity, stack.count)
+            onItemPickup(entity)
             entity.discard()
         }
     }
@@ -251,28 +252,28 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
     /**
      * Handles damage.
      */
-    override fun damage(world: ServerWorld, source: DamageSource, amount: Float): Boolean {
+    override fun hurtServer(world: ServerLevel, source: DamageSource, amount: Float): Boolean {
         return if (isInvulnerableTo(world, source)) {
             false
         } else {
-            if (!world.isClient && hanging) {
+            if (!world.isClientSide && hanging) {
                 hanging = false
             }
 
-            dropInventory(world)
-            super.damage(world, source, amount)
+            dropEquipment(world)
+            super.hurtServer(world, source, amount)
         }
     }
 
     /**
      * Handles Direbat attacking.
      */
-    override fun tryAttack(world: ServerWorld, target: Entity): Boolean {
-        return if (super.tryAttack(world, target)) {
+    override fun doHurtTarget(world: ServerLevel, target: Entity): Boolean {
+        return if (super.doHurtTarget(world, target)) {
             if (target is LivingEntity) {
                 val duration = (if (world.difficulty == Difficulty.HARD) 10 else 5) * 20
-                val statusEffect = StatusEffectInstance(StatusEffects.BLINDNESS, duration, 0)
-                target.addStatusEffect(statusEffect)
+                val statusEffect = MobEffectInstance(MobEffects.BLINDNESS, duration, 0)
+                target.addEffect(statusEffect)
             }
 
             playSound(attackSound, 1.0f, 1.0f)
@@ -280,53 +281,53 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
         } else false
     }
 
-    override fun travel(movementInput: Vec3d) {
-        if (canMoveVoluntarily()) {
-            updateVelocity(0.1f, movementInput)
-            move(MovementType.SELF, velocity)
-            velocity = velocity.multiply(0.9)
+    override fun travel(movementInput: Vec3) {
+        if (canSimulateMovement()) {
+            moveRelative(0.1f, movementInput)
+            move(MoverType.SELF, deltaMovement)
+            setDeltaMovement(deltaMovement.scale(0.9))
         }
     }
 
-    override fun getPathfindingFavor(pos: BlockPos, world: WorldView): Float {
+    override fun getWalkTargetValue(pos: BlockPos, world: LevelReader): Float {
         if (world.getBlockState(pos).isAir) {
             var offset = 0.0f
 
-            if (!world.getBlockState(pos.down()).isAir) {
+            if (!world.getBlockState(pos.below()).isAir) {
                 offset -= 2.0f
             }
 
-            if (world is World && canHangAt(pos.up(), world, this, avoidsFallingBlocks)) {
+            if (world is Level && canHangAt(pos.above(), world, this, avoidsFallingBlocks)) {
                 offset += 2.0f
             }
 
             @Suppress("DEPRECATION")
-            return 1.0f / (world.getBrightness(pos)) + offset
+            return 1.0f / (world.getLightLevelDependentMagicValue(pos)) + offset
         }
 
         return 0.0f
     }
 
     @Environment(EnvType.CLIENT)
-    override fun handleStatus(status: Byte) {
+    override fun handleEntityEvent(status: Byte) {
         when (status) {
-            EntityStatuses.CREATE_EATING_PARTICLES -> {
-                val stack = getEquippedStack(EquipmentSlot.MAINHAND)
+            EntityEvent.FOX_EAT -> {
+                val stack = getItemBySlot(EquipmentSlot.MAINHAND)
                 if (!stack.isEmpty) {
                     for (i in 1..8) {
-                        val velocity = Vec3d((random.nextFloat().toDouble() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, 0.0)
-                            .rotateX(-pitch * (Math.PI.toFloat() / 180))
-                            .rotateY(-yaw * (Math.PI.toFloat() / 180))
-                        world.addParticleClient(
-                            ItemStackParticleEffect(ParticleTypes.ITEM, stack),
-                            this.x + this.rotationVector.x / 2.0, this.y, this.z + this.rotationVector.z / 2.0,
+                        val velocity = Vec3((random.nextFloat().toDouble() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, 0.0)
+                            .xRot(-xRot * (Math.PI.toFloat() / 180))
+                            .yRot(-yRot * (Math.PI.toFloat() / 180))
+                        level().addParticle(
+                            ItemParticleOption(ParticleTypes.ITEM, stack),
+                            this.x + this.lookAngle.x / 2.0, this.y, this.z + this.lookAngle.z / 2.0,
                             velocity.x, velocity.y + 0.05, velocity.z
                         )
                     }
                 }
             }
 
-            else -> super.handleStatus(status)
+            else -> super.handleEntityEvent(status)
         }
     }
 
@@ -353,70 +354,70 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
     /* Ticks */
 
     override fun tick() {
-        val world = world
-        if (world is ServerWorld) {
-            Vibrations.Ticker.tick(world, vibrationData, vibrationCallback)
+        val world = level()
+        if (world is ServerLevel) {
+            VibrationSystem.Ticker.tick(world, vibrationData, vibrationListenerCallback)
         }
 
         super.tick()
 
         // prevent getting stuck below the world
-        if (y <= world.bottomY) {
-            val velocityCache = velocity
-            setVelocity(velocityCache.x, 0.2, velocityCache.z)
+        if (y <= world.minY) {
+            val velocityCache = deltaMovement
+            setDeltaMovement(velocityCache.x, 0.2, velocityCache.z)
         } else {
-            velocity = if (hanging) Vec3d.ZERO else velocity.multiply(1.05)
+            setDeltaMovement(if (hanging) Vec3.ZERO else deltaMovement.scale(1.05))
         }
     }
 
     @Suppress("DEPRECATION")
-    override fun mobTick(world: ServerWorld) {
+    override fun customServerAiStep(world: ServerLevel) {
         val targetCache = target
-        if (targetCache is PlayerEntity && !isValidTarget(targetCache)) {
+        if (targetCache is Player && !isValidTarget(targetCache)) {
             target = null
         }
 
-        super.mobTick(world)
+        super.customServerAiStep(world)
 
         // tick pickup cooldown
         if (pickupCooldown > 0) {
             pickupCooldown--
         }
 
-        if (!world.isClient) {
+        if (!world.isClientSide) {
             if (hanging) {
                 // if cannot hang, stop hanging
                 if (!canHang) {
                     hanging = false
 
                     if (!isSilent) {
-                        world.syncWorldEvent(null, WorldEvents.BAT_TAKES_OFF, blockPos, 0)
+                        world.levelEvent(null, LevelEvent.SOUND_BAT_LIFTOFF, blockPosition(), 0)
                     }
                 }
 
                 // eat held item
-                val stack = getEquippedStack(EquipmentSlot.MAINHAND)
-                if (!stack.isEmpty && (stack.components.contains(DataComponentTypes.FOOD) || stack.isIn(ItemTags.ARROWS))) {
+                val stack = getItemBySlot(EquipmentSlot.MAINHAND)
+                if (!stack.isEmpty && (stack.components.has(DataComponents.FOOD) || stack.`is`(ItemTags.ARROWS))) {
                     if (eatingTime > MAX_EATING_TIME) { // finish eating
-                        val finishedStack = stack.finishUsing(world, this)
-                        if (stack.isIn(ItemTags.ARROWS)) { // if arrow, convert to direbat fang arrow
+                        val finishedStack = stack.finishUsingItem(world, this)
+                        if (stack.`is`(ItemTags.ARROWS)) { // if arrow, convert to direbat fang arrow
                             val arrowStack = stack.copy()
                             arrowStack.item = DirebatsItems.DIREBAT_FANG_ARROW
-                            equipStack(EquipmentSlot.MAINHAND, arrowStack)
+                            setItemSlot(EquipmentSlot.MAINHAND, arrowStack)
                         } else if (!finishedStack.isEmpty) { // else, equip finished stack
-                            equipStack(EquipmentSlot.MAINHAND, finishedStack)
+                            setItemSlot(EquipmentSlot.MAINHAND, finishedStack)
                         }
                         eatingTime = -1
                     } else { // during consumption
                         if (eatingTime > EATING_EFFECTS_TIME) {
                             // randomly play eating effects
                             if (random.nextFloat() < 0.1F) {
-                                val consumableComponent = stack.get(DataComponentTypes.CONSUMABLE)
+                                val consumableComponent = stack.get(DataComponents.CONSUMABLE)
                                 consumableComponent?.sound?.let {
-                                    playSound(it.value(), soundVolume, soundPitch)
+                                    playSound(it.value(), soundVolume, voicePitch)
                                 }
 
-                                world.sendEntityStatus(this, EntityStatuses.CREATE_EATING_PARTICLES)
+                                world.broadcastEntityEvent(this, EntityEvent.FOX_EAT)
                             }
                         }
 
@@ -452,42 +453,42 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
      * block will fall and it will learn about the dangers.
      */
     fun updateCeiling() {
-        val ceilingPos = blockPos.up()
-        val ceilingState = world.getBlockState(ceilingPos)
+        val ceilingPos = blockPosition().above()
+        val ceilingState = level().getBlockState(ceilingPos)
         if (ceilingState.block is FallingBlock) {
             avoidsFallingBlocks = true
         }
-        ceilingState.updateNeighbors(world, ceilingPos, Block.NOTIFY_ALL)
+        ceilingState.updateNeighbourShapes(level(), ceilingPos, Block.UPDATE_ALL)
     }
 
     @Suppress("DEPRECATION")
-    override fun tickMovement() {
+    override fun aiStep() {
         // skylight fire damage
-        if (isAlive && isAffectedByDaylight) {
+        if (isAlive && isSunBurnTick) {
             // head protection
-            val stack = getEquippedStack(EquipmentSlot.HEAD)
+            val stack = getItemBySlot(EquipmentSlot.HEAD)
             if (!stack.isEmpty) {
-                if (stack.isDamageable) {
-                    stack.damage = stack.damage + random.nextInt(2)
-                    if (stack.damage >= stack.maxDamage) {
-                        sendEquipmentBreakStatus(stack.item, EquipmentSlot.HEAD)
-                        equipStack(EquipmentSlot.HEAD, ItemStack.EMPTY)
+                if (stack.isDamageableItem) {
+                    stack.damageValue = stack.damageValue + random.nextInt(2)
+                    if (stack.damageValue >= stack.maxDamage) {
+                        onEquippedItemBroken(stack.item, EquipmentSlot.HEAD)
+                        setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY)
                     }
                 }
             } else {
-                setOnFireFor(8.0f)
+                igniteForSeconds(8.0f)
             }
         }
 
-        super.tickMovement()
+        super.aiStep()
     }
 
     /**
      * Accepts vibration events.
      */
-    override fun updateEventHandler(callback: BiConsumer<EntityGameEventHandler<*>, ServerWorld>) {
-        val world = world
-        if (world is ServerWorld) {
+    override fun updateDynamicGameEventListener(callback: BiConsumer<DynamicGameEventListener<*>, ServerLevel>) {
+        val world = level()
+        if (world is ServerLevel) {
             callback.accept(gameEventHandler, world)
         }
     }
@@ -496,28 +497,28 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
      * @return the first available item to pick up
      */
     fun findItemEntityToPickUp(): ItemEntity? {
-        val list = world.getEntitiesByClass(ItemEntity::class.java, boundingBox.expand(8.0, 8.0, 8.0), PICKABLE_DROP_FILTER)
+        val list = level().getEntitiesOfClass(ItemEntity::class.java, boundingBox.inflate(8.0, 8.0, 8.0), PICKABLE_DROP_FILTER)
         return if (list.isNotEmpty()) list[random.nextInt(list.size)] else null
     }
 
     /**
      * @return whether a player should wake up a Direbat
      */
-    fun isValidTarget(player: PlayerEntity): Boolean {
-        if (world !== player.world) return false
-        if (!EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(player)) return false
-        if (isTeammate(player)) return false
+    fun isValidTarget(player: Player): Boolean {
+        if (level() !== player.level()) return false
+        if (!EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(player)) return false
+        if (isAlliedTo(player)) return false
         if (player.isInvulnerable) return false
-        if (player.isDead) return false
-        return world.worldBorder.contains(player.boundingBox)
+        if (player.isDeadOrDying) return false
+        return level().worldBorder.isWithinBounds(player.boundingBox)
     }
 
     /* NBT */
 
-    override fun writeCustomData(view: WriteView) {
-        super.writeCustomData(view)
+    override fun addAdditionalSaveData(view: ValueOutput) {
+        super.addAdditionalSaveData(view)
 
-        view.put(LISTENER_KEY, Vibrations.ListenerData.CODEC, vibrationListenerData)
+        view.store(LISTENER_KEY, VibrationSystem.Data.CODEC, vibrationData)
 
         view.putBoolean(HANGING_KEY, hanging)
         view.putBoolean(AVOIDS_FALLING_BLOCKS_KEY, avoidsFallingBlocks)
@@ -526,33 +527,33 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
         view.putInt(PICKUP_COOLDOWN_KEY, pickupCooldown)
     }
 
-    override fun readCustomData(view: ReadView) {
-        super.readCustomData(view)
+    override fun readAdditionalSaveData(view: ValueInput) {
+        super.readAdditionalSaveData(view)
 
-        vibrationData = view.read<Vibrations.ListenerData>("listener", Vibrations.ListenerData.CODEC).orElseGet { Vibrations.ListenerData() }
+        vibrationData = view.read<VibrationSystem.Data>("listener", VibrationSystem.Data.CODEC).orElseGet { VibrationSystem.Data() }
 
-        hanging = view.getBoolean(HANGING_KEY, false)
-        avoidsFallingBlocks = view.getBoolean(AVOIDS_FALLING_BLOCKS_KEY, false)
-        eatingTime = view.getInt(EATING_TIME_KEY, -1)
-        hangingCooldown = view.getInt(HANGING_COOLDOWN_KEY, 0)
-        pickupCooldown = view.getInt(PICKUP_COOLDOWN_KEY, 0)
+        hanging = view.getBooleanOr(HANGING_KEY, false)
+        avoidsFallingBlocks = view.getBooleanOr(AVOIDS_FALLING_BLOCKS_KEY, false)
+        eatingTime = view.getIntOr(EATING_TIME_KEY, -1)
+        hangingCooldown = view.getIntOr(HANGING_COOLDOWN_KEY, 0)
+        pickupCooldown = view.getIntOr(PICKUP_COOLDOWN_KEY, 0)
     }
 
-    override fun getVibrationListenerData(): Vibrations.ListenerData {
+    override fun getVibrationData(): VibrationSystem.Data {
         return vibrationData
     }
 
-    override fun getVibrationCallback(): Vibrations.Callback {
+    override fun getVibrationUser(): VibrationSystem.User {
         return vibrationListenerCallback
     }
 
     companion object {
         val PICKABLE_DROP_FILTER = Predicate<ItemEntity> { entity -> entity != null &&
-                !entity.cannotPickup() && entity.stack.isIn(DirebatsItemTags.PICKED_UP_BY_DIREBAT)
+                !entity.hasPickUpDelay() && entity.item.`is`(DirebatsItemTags.PICKED_UP_BY_DIREBAT)
         }
 
-        val HANGING: TrackedData<Boolean> = DataTracker.registerData(DirebatEntity::class.java, TrackedDataHandlerRegistry.BOOLEAN)
-        val EATING_TIME: TrackedData<Int> = DataTracker.registerData(DirebatEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
+        val HANGING: EntityDataAccessor<Boolean> = SynchedEntityData.defineId(DirebatEntity::class.java, EntityDataSerializers.BOOLEAN)
+        val EATING_TIME: EntityDataAccessor<Int> = SynchedEntityData.defineId(DirebatEntity::class.java, EntityDataSerializers.INT)
 
         const val HANGING_KEY = "Hanging"
         const val AVOIDS_FALLING_BLOCKS_KEY = "AvoidsFallingBlocks"
@@ -577,58 +578,58 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
          */
         fun canSpawn(
             type: EntityType<DirebatEntity>,
-            world: ServerWorldAccess,
-            spawnReason: SpawnReason,
+            world: ServerLevelAccessor,
+            spawnReason: EntitySpawnReason,
             pos: BlockPos,
-            random: Random
+            random: RandomSource
         ): Boolean {
-            world as ServerWorld
+            world as ServerLevel
 
             return if (pos.y >= world.seaLevel) {
-                world.isNight && world.moonSize == 1.0f
+                world.isDarkOutside && world.moonBrightness == 1.0f
             } else {
-                val worldLight = world.getLightLevel(pos)
-                val maximumLight = if (BatEntity.isTodayAroundHalloween()) 7 else 4
-                worldLight <= random.nextInt(maximumLight) && canMobSpawn(type, world, spawnReason, pos, random)
+                val worldLight = world.getMaxLocalRawBrightness(pos)
+                val maximumLight = if (Bat.isHalloween()) 7 else 4
+                worldLight <= random.nextInt(maximumLight) && checkMobSpawnRules(type, world, spawnReason, pos, random)
             }
         }
 
         /**
          * @return the default Direbat attribute container
          */
-        fun createDirebatAttributes(): DefaultAttributeContainer.Builder {
+        fun createDirebatAttributes(): AttributeSupplier.Builder {
             return createMobAttributes()
-                .add(EntityAttributes.MAX_HEALTH, 16.0)
-                .add(EntityAttributes.FLYING_SPEED, 0.22)
-                .add(EntityAttributes.MOVEMENT_SPEED, 0.22)
-                .add(EntityAttributes.ATTACK_DAMAGE, 4.0)
+                .add(Attributes.MAX_HEALTH, 16.0)
+                .add(Attributes.FLYING_SPEED, 0.22)
+                .add(Attributes.MOVEMENT_SPEED, 0.22)
+                .add(Attributes.ATTACK_DAMAGE, 4.0)
         }
 
         /**
          * @return whether a Direbat can hang at a given position
          */
-        fun canHangAt(pos: BlockPos, world: World, entity: Entity, avoidsFallingBlocks: Boolean): Boolean {
+        fun canHangAt(pos: BlockPos, world: Level, entity: Entity, avoidsFallingBlocks: Boolean): Boolean {
             // if learnt about falling blocks, avoid falling blocks
-            val ceilingPos = pos.up()
+            val ceilingPos = pos.above()
             val ceilingState = world.getBlockState(ceilingPos)
             if (avoidsFallingBlocks && ceilingState.block is FallingBlock) {
                 return false
             }
 
             // check is cube
-            if (!ceilingState.isFullCube(world, ceilingPos)) {
+            if (!ceilingState.isCollisionShapeFullBlock(world, ceilingPos)) {
                 return false
             }
 
             // check hanging position for already present direbats
-            val mutable = pos.mutableCopy()
+            val mutable = pos.mutable()
             for (i in 1..2) {
-                val box = Box.of(Vec3d.of(mutable), 1.0, 1.0, 1.0)
-                if (world.getEntitiesByClass(DirebatEntity::class.java, box) { direbatEntity -> direbatEntity !== entity && direbatEntity.hanging }.isNotEmpty()) {
+                val box = AABB.ofSize(Vec3.atLowerCornerOf(mutable), 1.0, 1.0, 1.0)
+                if (world.getEntitiesOfClass(DirebatEntity::class.java, box) { direbatEntity -> direbatEntity !== entity && direbatEntity.hanging }.isNotEmpty()) {
                     return false
                 }
 
-                if (!world.getBlockState(mutable).getCollisionShape(world, mutable, ShapeContext.of(entity)).isEmpty) {
+                if (!world.getBlockState(mutable).getCollisionShape(world, mutable, CollisionContext.of(entity)).isEmpty) {
                     return false
                 }
 
@@ -642,10 +643,10 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
     /**
      * A customised [ActiveTargetGoal], for Direbats, based on light level.
      */
-    class DirebatTargetGoal<T : LivingEntity>(mob: DirebatEntity, classTarget: Class<T>) : ActiveTargetGoal<T>(mob, classTarget, true) {
-        override fun canStart(): Boolean {
+    class DirebatTargetGoal<T : LivingEntity>(mob: DirebatEntity, classTarget: Class<T>) : NearestAttackableTargetGoal<T>(mob, classTarget, true) {
+        override fun canUse(): Boolean {
             @Suppress("DEPRECATION")
-            return mob.brightnessAtEyes >= 0.5 && !super.canStart()
+            return mob.lightLevelDependentMagicValue >= 0.5 && !super.canUse()
         }
     }
 
@@ -654,35 +655,35 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
      */
     class DirebatWanderGoal(val mob: DirebatEntity) : Goal() {
         init {
-            controls = EnumSet.of(Control.MOVE)
+            setFlags(EnumSet.of(Flag.MOVE))
         }
 
-        override fun canStart(): Boolean {
-            return mob.navigation.isIdle && !mob.hanging && mob.random.nextInt(5) == 0
+        override fun canUse(): Boolean {
+            return mob.navigation.isDone && !mob.hanging && mob.random.nextInt(5) == 0
         }
 
-        override fun shouldContinue(): Boolean {
-            return mob.navigation.isFollowingPath
+        override fun canContinueToUse(): Boolean {
+            return mob.navigation.isInProgress
         }
 
         override fun start() {
             calculateRandomLocation()?.run {
                 val navigation = mob.navigation
-                navigation.startMovingAlong(navigation.findPathTo(x, y, z, 1), 1.0)
+                navigation.moveTo(navigation.createPath(x, y, z, 1), 1.0)
             }
         }
 
-        fun calculateRandomLocation(): Vec3d? {
-            val rotation = if (mob.hasPositionTarget() && !mob.positionTarget.isWithinDistance(mob.pos, 22.0)) {
-                Vec3d.ofCenter(mob.positionTarget).subtract(mob.pos).normalize()
+        fun calculateRandomLocation(): Vec3? {
+            val rotation = if (mob.hasHome() && !mob.homePosition.closerToCenterThan(mob.position(), 22.0)) {
+                Vec3.atCenterOf(mob.homePosition).subtract(mob.position()).normalize()
             } else {
-                mob.getRotationVec(0.0f)
+                mob.getViewVector(0.0f)
             }
 
-            return AboveGroundTargeting.find(
+            return HoverRandomPos.getPos(
                 mob, 8, 7, rotation.x, rotation.z,
                 Math.PI.toFloat() / 2f, 2, 1
-            ) ?: NoPenaltySolidTargeting.find(
+            ) ?: AirAndWaterRandomPos.getPos(
                 mob,
                 8,
                 4,
@@ -701,17 +702,17 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
         private var itemEntity: ItemEntity? = null
 
         init {
-            controls = EnumSet.of(Control.MOVE)
+            setFlags(EnumSet.of(Flag.MOVE))
         }
 
-        override fun canStart(): Boolean {
+        override fun canUse(): Boolean {
             // can't start if cooling down
             if (direbat.pickupCooldown > 0) {
                 return false
             }
 
             // can't start if already has item
-            if (!direbat.mainHandStack.isEmpty) {
+            if (!direbat.mainHandItem.isEmpty) {
                 return false
             }
 
@@ -721,8 +722,8 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
             }
 
             // can't start if configured not to
-            val world = direbat.world
-            if (world is ServerWorld) {
+            val world = direbat.level()
+            if (world is ServerLevel) {
                 if (!world.gameRules.getBoolean(DirebatsGameRules.DO_DIREBAT_ITEM_PICKUP)) {
                     return false
                 }
@@ -740,7 +741,7 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
         override fun start() {
             // start moving to
             itemEntity?.run {
-                direbat.navigation.startMovingTo(this, 1.2)
+                direbat.navigation.moveTo(this, 1.2)
             }
 
             // create cooldown
@@ -750,19 +751,19 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
         override fun tick() {
             // continue moving to
             itemEntity?.run {
-                direbat.navigation.startMovingTo(this, 1.2)
+                direbat.navigation.moveTo(this, 1.2)
             }
         }
 
-        override fun shouldContinue(): Boolean {
-            return direbat.navigation.isFollowingPath && direbat.mainHandStack.isEmpty
+        override fun canContinueToUse(): Boolean {
+            return direbat.navigation.isInProgress && direbat.mainHandItem.isEmpty
         }
     }
 
-    inner class VibrationCallback : Vibrations.Callback {
-        val positionSource = EntityPositionSource(this@DirebatEntity, standingEyeHeight)
+    inner class VibrationCallback : VibrationSystem.User {
+        val positionSource = EntityPositionSource(this@DirebatEntity, eyeHeight)
 
-        override fun getRange(): Int {
+        override fun getListenerRadius(): Int {
             return 8
         }
 
@@ -770,8 +771,8 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
             return positionSource
         }
 
-        override fun accepts(world: ServerWorld, pos: BlockPos, event: RegistryEntry<GameEvent>, emitter: GameEvent.Emitter): Boolean {
-            if (isAiDisabled || dead || !world.worldBorder.contains(pos)) {
+        override fun canReceiveVibration(world: ServerLevel, pos: BlockPos, event: Holder<GameEvent>, emitter: GameEvent.Context): Boolean {
+            if (isNoAi || dead || !world.worldBorder.isWithinBounds(pos)) {
                 return false
             }
 
@@ -780,24 +781,24 @@ class DirebatEntity(entityType: EntityType<out PathAwareEntity>, world: World) :
             }
 
             val entity = emitter.sourceEntity
-            return entity is PlayerEntity && isValidTarget(entity)
+            return entity is Player && isValidTarget(entity)
         }
 
-        override fun accept(world: ServerWorld, pos: BlockPos, event: RegistryEntry<GameEvent>, sourceEntity: Entity?, entity: Entity?, distance: Float) {
+        override fun onReceiveVibration(world: ServerLevel, pos: BlockPos, event: Holder<GameEvent>, sourceEntity: Entity?, entity: Entity?, distance: Float) {
             if (dead) {
                 return
             }
 
-            if (sourceEntity is PlayerEntity) {
+            if (sourceEntity is Player) {
                 target = sourceEntity
 
-                val pitch = soundPitch * 1.4f
+                val pitch = voicePitch * 1.4f
                 ambientSound?.let { playSound(it, 1.0f, pitch) }
                 playSound(attackSound, 1.0f, pitch)
             }
         }
 
-        override fun getTag(): TagKey<GameEvent> {
+        override fun getListenableEvents(): TagKey<GameEvent> {
             return DirebatsGameEventTags.DIREBAT_CAN_LISTEN
         }
     }

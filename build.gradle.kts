@@ -35,7 +35,7 @@ val versionFabricKotlin = extra["fabric_language_kotlin_version"] as String
 
 dependencies {
     minecraft("com.mojang", "minecraft", versionMinecraft)
-    mappings("net.fabricmc", "yarn", "$versionMinecraft+build.$versionYarn", null, "v2")
+    mappings(loom.officialMojangMappings())
     modImplementation("net.fabricmc", "fabric-loader", versionLoader)
     modImplementation("net.fabricmc.fabric-api", "fabric-api", versionFabricApi)
     include(modImplementation("net.fabricmc", "fabric-language-kotlin", versionFabricKotlin))

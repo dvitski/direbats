@@ -1,10 +1,10 @@
 package dev.andante.direbats.tag
 
 import dev.andante.direbats.Direbats
-import net.minecraft.item.Item
-import net.minecraft.registry.RegistryKeys
-import net.minecraft.registry.tag.TagKey
-import net.minecraft.util.Identifier
+import net.minecraft.core.registries.Registries
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.tags.TagKey
+import net.minecraft.world.item.Item
 
 object DirebatsItemTags {
     /**
@@ -18,6 +18,6 @@ object DirebatsItemTags {
     val DIREBAT_PICKS_UP_EGG_ADVANCEMENT_ITEMS = register("direbat_picks_up_egg_advancement_items")
 
     private fun register(id: String): TagKey<Item> {
-        return TagKey.of(RegistryKeys.ITEM, Identifier.of(Direbats.MOD_ID, id))
+        return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(Direbats.MOD_ID, id))
     }
 }

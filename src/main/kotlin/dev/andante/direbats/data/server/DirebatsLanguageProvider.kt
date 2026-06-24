@@ -8,17 +8,17 @@ import dev.andante.direbats.item.DirebatsItems
 import dev.andante.direbats.world.DirebatsGameRules
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider
-import net.minecraft.entity.EntityType
-import net.minecraft.registry.Registries
-import net.minecraft.registry.RegistryWrapper
-import net.minecraft.world.GameRules
+import net.minecraft.core.HolderLookup
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.world.entity.EntityType
+import net.minecraft.world.level.GameRules
 import java.util.concurrent.CompletableFuture
 
 /**
  * Generates Direbats language files.
  */
-class DirebatsLanguageProvider(out: FabricDataOutput, lookup: CompletableFuture<RegistryWrapper.WrapperLookup>) : FabricLanguageProvider(out, lookup) {
-    override fun generateTranslations(lookup: RegistryWrapper.WrapperLookup, builder: TranslationBuilder) {
+class DirebatsLanguageProvider(out: FabricDataOutput, lookup: CompletableFuture<HolderLookup.Provider>) : FabricLanguageProvider(out, lookup) {
+    override fun generateTranslations(lookup: HolderLookup.Provider, builder: TranslationBuilder) {
         builder.add("itemGroup.${Direbats.MOD_ID}.all", Direbats.MOD_NAME)
 
         builder.add(DirebatsEntityTypes.DIREBAT, "Direbat")
@@ -43,7 +43,7 @@ class DirebatsLanguageProvider(out: FabricDataOutput, lookup: CompletableFuture<
 
     companion object {
         fun TranslationBuilder.add(rule: GameRules.Key<*>, value: String) {
-            return add(rule.translationKey, value)
+            return add(rule.descriptionId, value)
         }
 
         fun TranslationBuilder.subtitle(entity: EntityType<*>, id: String, value: String) {
@@ -51,7 +51,7 @@ class DirebatsLanguageProvider(out: FabricDataOutput, lookup: CompletableFuture<
         }
 
         fun EntityType<*>.getSubtitle(id: String): String {
-            val identifier = Registries.ENTITY_TYPE.getId(this)
+            val identifier = BuiltInRegistries.ENTITY_TYPE.getKey(this)
             return "subtitles.${identifier.namespace}.entity.${identifier.path}.$id"
         }
     }

@@ -2,24 +2,24 @@ package dev.andante.direbats.item
 
 import dev.andante.direbats.Direbats
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup
-import net.minecraft.item.ItemGroup
-import net.minecraft.item.ItemStack
-import net.minecraft.registry.Registries
-import net.minecraft.registry.Registry
-import net.minecraft.text.Text
-import net.minecraft.util.Identifier
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.CreativeModeTab
+import net.minecraft.world.item.ItemStack
 
 object DirebatsItemGroups {
     val ALL = register("all", FabricItemGroup.builder()
-        .displayName(Text.translatable("itemGroup.${Direbats.MOD_ID}.all"))
-        .entries { _, entries ->
-            entries.add(DirebatsItems.DIREBAT_SPAWN_EGG)
-            entries.add(DirebatsItems.DIREBAT_FANG)
-            entries.add(DirebatsItems.DIREBAT_FANG_ARROW)
+        .title(Component.translatable("itemGroup.${Direbats.MOD_ID}.all"))
+        .displayItems { _, entries ->
+            entries.accept(DirebatsItems.DIREBAT_SPAWN_EGG)
+            entries.accept(DirebatsItems.DIREBAT_FANG)
+            entries.accept(DirebatsItems.DIREBAT_FANG_ARROW)
         }
         .icon { ItemStack(DirebatsItems.DIREBAT_FANG) })
 
-    private fun register(id: String, builder: ItemGroup.Builder): ItemGroup {
-        return Registry.register(Registries.ITEM_GROUP, Identifier.of(Direbats.MOD_ID, id), builder.build())
+    private fun register(id: String, builder: CreativeModeTab.Builder): CreativeModeTab {
+        return Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(Direbats.MOD_ID, id), builder.build())
     }
 }

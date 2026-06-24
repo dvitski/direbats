@@ -4,8 +4,8 @@ import dev.andante.direbats.Direbats
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry
-import net.minecraft.client.render.entity.model.EntityModelLayer
-import net.minecraft.util.Identifier
+import net.minecraft.client.model.geom.ModelLayerLocation
+import net.minecraft.resources.ResourceLocation
 
 /**
  * Represents Direbats entity model layers.
@@ -14,8 +14,8 @@ import net.minecraft.util.Identifier
 object DirebatsEntityModelLayers {
     val DIREBAT = registerMain("direbat")
 
-    private fun registerMain(id: String): EntityModelLayer {
-        val layer = EntityModelLayer(Identifier.of(Direbats.MOD_ID, id), "main")
+    private fun registerMain(id: String): ModelLayerLocation {
+        val layer = ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(Direbats.MOD_ID, id), "main")
         EntityModelLayerRegistry.registerModelLayer(layer, DirebatEntityModel::TEXTURED_MODEL_DATA)
         return layer
     }

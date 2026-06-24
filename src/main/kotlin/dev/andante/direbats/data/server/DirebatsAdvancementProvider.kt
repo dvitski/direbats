@@ -6,22 +6,22 @@ import dev.andante.direbats.entity.DirebatsEntityTypes
 import dev.andante.direbats.tag.DirebatsItemTags
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricAdvancementProvider
-import net.minecraft.advancement.Advancement
-import net.minecraft.advancement.AdvancementDisplay
-import net.minecraft.advancement.AdvancementEntry
-import net.minecraft.advancement.AdvancementFrame
-import net.minecraft.advancement.criterion.ThrownItemPickedUpByEntityCriterion
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.loot.condition.EntityPropertiesLootCondition
-import net.minecraft.loot.context.LootContext.EntityTarget
-import net.minecraft.predicate.entity.EntityPredicate
-import net.minecraft.predicate.entity.LootContextPredicate
-import net.minecraft.predicate.item.ItemPredicate
-import net.minecraft.registry.RegistryKeys
-import net.minecraft.registry.RegistryWrapper
-import net.minecraft.text.Text
-import net.minecraft.util.Identifier
+import net.minecraft.advancements.Advancement
+import net.minecraft.advancements.AdvancementHolder
+import net.minecraft.advancements.AdvancementType
+import net.minecraft.advancements.DisplayInfo
+import net.minecraft.advancements.critereon.ContextAwarePredicate
+import net.minecraft.advancements.critereon.EntityPredicate
+import net.minecraft.advancements.critereon.ItemPredicate
+import net.minecraft.advancements.critereon.PickedUpItemTrigger
+import net.minecraft.core.HolderLookup
+import net.minecraft.core.registries.Registries
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import net.minecraft.world.level.storage.loot.LootContext.EntityTarget
+import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition
 import java.util.Optional
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
@@ -29,37 +29,38 @@ import java.util.function.Consumer
 /**
  * Generates Direbats advancements.
  */
-class DirebatsAdvancementProvider(out: FabricDataOutput, lookup: CompletableFuture<RegistryWrapper.WrapperLookup>) : FabricAdvancementProvider(out, lookup) {
-    override fun generateAdvancement(lookup: RegistryWrapper.WrapperLookup, exporter: Consumer<AdvancementEntry>) {
-        Advancement.Builder.create()
-            .parent(Advancement.Builder.create().build(Identifier.of("adventure/root")))
-            .display(AdvancementDisplay(
+class DirebatsAdvancementProvider(out: FabricDataOutput, lookup: CompletableFuture<HolderLookup.Provider>) : FabricAdvancementProvider(out, lookup) {
+    override fun generateAdvancement(lookup: HolderLookup.Provider, exporter: Consumer<AdvancementHolder>) {
+        Advancement.Builder.advancement()
+            .parent(Advancement.Builder.advancement().build(ResourceLocation.parse("adventure/root")))
+            .display(
+                DisplayInfo(
                 ItemStack(Items.EGG),
-                Text.translatable(DirebatsAdvancementLanguageStrings.DIREBAT_PICKS_UP_EGG_TITLE),
-                Text.translatable(DirebatsAdvancementLanguageStrings.DIREBAT_PICKS_UP_EGG_DESCRIPTION),
-                Optional.empty(), AdvancementFrame.CHALLENGE, true, true, false
+                Component.translatable(DirebatsAdvancementLanguageStrings.DIREBAT_PICKS_UP_EGG_TITLE),
+                Component.translatable(DirebatsAdvancementLanguageStrings.DIREBAT_PICKS_UP_EGG_DESCRIPTION),
+                Optional.empty(), AdvancementType.CHALLENGE, true, true, false
             ))
-            .criterion(
+            .addCriterion(
                 "pick_up_egg",
-                ThrownItemPickedUpByEntityCriterion.Conditions.createThrownItemPickedUpByEntity(
-                    LootContextPredicate.create(),
+                PickedUpItemTrigger.TriggerInstance.thrownItemPickedUpByEntity(
+                    ContextAwarePredicate.create(),
                     Optional.of(
-                        ItemPredicate.Builder.create()
-                            .tag(lookup.getOrThrow(RegistryKeys.ITEM), DirebatsItemTags.DIREBAT_PICKS_UP_EGG_ADVANCEMENT_ITEMS)
+                        ItemPredicate.Builder.item()
+                            .of(lookup.lookupOrThrow(Registries.ITEM), DirebatsItemTags.DIREBAT_PICKS_UP_EGG_ADVANCEMENT_ITEMS)
                             .build()
                     ),
                     Optional.of(
-                        LootContextPredicate.create(
-                            EntityPropertiesLootCondition.builder(
+                        ContextAwarePredicate.create(
+                            LootItemEntityPropertyCondition.hasProperties(
                                 EntityTarget.THIS,
-                                EntityPredicate.Builder.create()
-                                    .type(lookup.getOrThrow(RegistryKeys.ENTITY_TYPE), DirebatsEntityTypes.DIREBAT)
+                                EntityPredicate.Builder.entity()
+                                    .of(lookup.lookupOrThrow(Registries.ENTITY_TYPE), DirebatsEntityTypes.DIREBAT)
                             ).build()
                         )
                     )
                 )
             )
-            .build(Identifier.of(Direbats.MOD_ID, "direbat_picks_up_egg"))
+            .build(ResourceLocation.fromNamespaceAndPath(Direbats.MOD_ID, "direbat_picks_up_egg"))
             .let(exporter::accept)
     }
 }

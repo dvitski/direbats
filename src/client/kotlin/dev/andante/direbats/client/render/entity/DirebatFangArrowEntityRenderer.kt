@@ -4,26 +4,26 @@ import dev.andante.direbats.Direbats
 import dev.andante.direbats.entity.DirebatFangArrowEntity
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.render.entity.EntityRendererFactory
-import net.minecraft.client.render.entity.ProjectileEntityRenderer
-import net.minecraft.client.render.entity.state.ArrowEntityRenderState
-import net.minecraft.entity.projectile.PersistentProjectileEntity
-import net.minecraft.util.Identifier
+import net.minecraft.client.renderer.entity.ArrowRenderer
+import net.minecraft.client.renderer.entity.EntityRendererProvider
+import net.minecraft.client.renderer.entity.state.TippableArrowRenderState
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.entity.projectile.AbstractArrow
 
 /**
  * Represents the renderer for a [DirebatFangArrowEntity].
  */
 @Environment(EnvType.CLIENT)
-class DirebatFangArrowEntityRenderer<T : PersistentProjectileEntity>(ctx: EntityRendererFactory.Context) : ProjectileEntityRenderer<T, ArrowEntityRenderState>(ctx) {
-    override fun getTexture(state: ArrowEntityRenderState): Identifier {
+class DirebatFangArrowEntityRenderer<T : AbstractArrow>(ctx: EntityRendererProvider.Context) : ArrowRenderer<T, TippableArrowRenderState>(ctx) {
+    override fun getTextureLocation(state: TippableArrowRenderState): ResourceLocation {
         return TEXTURE
     }
 
-    override fun createRenderState(): ArrowEntityRenderState? {
-        return ArrowEntityRenderState()
+    override fun createRenderState(): TippableArrowRenderState? {
+        return TippableArrowRenderState()
     }
 
     companion object {
-        val TEXTURE: Identifier = Identifier.of(Direbats.MOD_ID, "textures/entity/arrow/direbat_fang_arrow.png")
+        val TEXTURE: ResourceLocation = ResourceLocation.fromNamespaceAndPath(Direbats.MOD_ID, "textures/entity/arrow/direbat_fang_arrow.png")
     }
 }

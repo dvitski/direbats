@@ -1,11 +1,11 @@
 package dev.andante.direbats.sound
 
 import dev.andante.direbats.entity.DirebatsEntityTypes
-import net.minecraft.entity.EntityType
-import net.minecraft.registry.Registries
-import net.minecraft.registry.Registry
-import net.minecraft.sound.SoundEvent
-import net.minecraft.util.Identifier
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.world.entity.EntityType
 
 object DirebatsSoundEvents {
     val ENTITY_DIREBAT_AMBIENT = direbat("ambient")
@@ -18,8 +18,8 @@ object DirebatsSoundEvents {
     }
 
     private fun registerEntity(entity: EntityType<*>, id: String): SoundEvent {
-        val identifier = Registries.ENTITY_TYPE.getId(entity)
-        val soundIdentifier = Identifier.of(identifier.namespace, "entity.${identifier.path}.$id")
-        return Registry.register(Registries.SOUND_EVENT, soundIdentifier, SoundEvent.of(soundIdentifier))
+        val identifier = BuiltInRegistries.ENTITY_TYPE.getKey(entity)
+        val soundIdentifier = ResourceLocation.fromNamespaceAndPath(identifier.namespace, "entity.${identifier.path}.$id")
+        return Registry.register(BuiltInRegistries.SOUND_EVENT, soundIdentifier, SoundEvent.createVariableRangeEvent(soundIdentifier))
     }
 }

@@ -2,33 +2,33 @@ package dev.andante.direbats.entity
 
 import dev.andante.direbats.item.DirebatsItems
 import dev.andante.direbats.tag.DirebatsEntityTypeTags
-import net.minecraft.entity.EntityType
-import net.minecraft.entity.LivingEntity
-import net.minecraft.entity.ai.goal.Goal
-import net.minecraft.entity.effect.StatusEffectInstance
-import net.minecraft.entity.effect.StatusEffects
-import net.minecraft.entity.mob.MobEntity
-import net.minecraft.entity.projectile.PersistentProjectileEntity
-import net.minecraft.item.ItemStack
-import net.minecraft.particle.ParticleTypes
-import net.minecraft.storage.ReadView
-import net.minecraft.storage.WriteView
-import net.minecraft.world.World
+import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.world.effect.MobEffectInstance
+import net.minecraft.world.effect.MobEffects
+import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.ai.goal.Goal
+import net.minecraft.world.entity.projectile.AbstractArrow
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.storage.ValueInput
+import net.minecraft.world.level.storage.ValueOutput
 
 /**
  * Represents a Direbat Fang Arrow entity.
  * @see [DirebatsEntityTypes.DIREBAT_FANG_ARROW]
  */
-class DirebatFangArrowEntity : PersistentProjectileEntity {
+class DirebatFangArrowEntity : AbstractArrow {
     private var duration = 300
 
-    constructor(entityType: EntityType<out DirebatFangArrowEntity>, world: World) : super(entityType, world)
-    constructor(world: World, owner: LivingEntity, stack: ItemStack, shotFrom: ItemStack?) : super(DirebatsEntityTypes.DIREBAT_FANG_ARROW, owner, world, stack, shotFrom)
+    constructor(entityType: EntityType<out DirebatFangArrowEntity>, world: Level) : super(entityType, world)
+    constructor(world: Level, owner: LivingEntity, stack: ItemStack, shotFrom: ItemStack?) : super(DirebatsEntityTypes.DIREBAT_FANG_ARROW, owner, world, stack, shotFrom)
 
     override fun tick() {
         super.tick()
 
-        if (world.isClient) {
+        if (level().isClientSide) {
             if (isInGround) {
                 if (inGroundTime % 5 == 0) {
                     spawnParticles(1)
@@ -41,46 +41,46 @@ class DirebatFangArrowEntity : PersistentProjectileEntity {
 
     private fun spawnParticles(amount: Int) {
         (0 until amount).forEach { _ ->
-            world.addParticleClient(ParticleTypes.INSTANT_EFFECT, x, y, z, 0.0, 0.0, 0.0)
+            level().addParticle(ParticleTypes.INSTANT_EFFECT, x, y, z, 0.0, 0.0, 0.0)
         }
     }
 
-    override fun onHit(target: LivingEntity) {
-        super.onHit(target)
+    override fun doPostHurtEffects(target: LivingEntity) {
+        super.doPostHurtEffects(target)
 
-        if (!target.type.isIn(DirebatsEntityTypeTags.DIREBAT_FANG_ARROW_EFFECTS_IMMUNE)) {
+        if (!target.type.`is`(DirebatsEntityTypeTags.DIREBAT_FANG_ARROW_EFFECTS_IMMUNE)) {
             // blind
-            target.addStatusEffect(StatusEffectInstance(StatusEffects.BLINDNESS, duration, 0), this.effectCause)
+            target.addEffect(MobEffectInstance(MobEffects.BLINDNESS, duration, 0), this.effectSource)
 
             // simulate confusion caused by blindness if mob
-            if (target is MobEntity && target.target != null) {
+            if (target is Mob && target.target != null) {
                 // clear visibility cache
-                target.visibilityCache.clear()
+                target.sensing.tick()
 
                 // cancel all goals (simulate confusion)
-                listOf(target.goalSelector, target.targetSelector).forEach { it.goals.forEach(Goal::stop) }
+                listOf(target.goalSelector, target.targetSelector).forEach { it.availableGoals.forEach(Goal::stop) }
 
                 // clear targetting variables
                 target.target = null
-                target.attacker = null
+                target.setLastHurtByMob(null)
             }
         }
     }
 
-    override fun getDefaultItemStack(): ItemStack {
+    override fun getDefaultPickupItem(): ItemStack {
         return ItemStack(DirebatsItems.DIREBAT_FANG_ARROW)
     }
 
     /* NBT */
 
-    override fun writeCustomData(view: WriteView) {
-        super.writeCustomData(view)
+    override fun addAdditionalSaveData(view: ValueOutput) {
+        super.addAdditionalSaveData(view)
         view.putInt(DURATION_KEY, duration)
     }
 
-    override fun readCustomData(view: ReadView) {
-        super.readCustomData(view)
-        duration = view.getInt(DURATION_KEY, 300)
+    override fun readAdditionalSaveData(view: ValueInput) {
+        super.readAdditionalSaveData(view)
+        duration = view.getIntOr(DURATION_KEY, 300)
     }
 
     companion object {

@@ -5,18 +5,18 @@ import dev.andante.direbats.tag.DirebatsItemTags
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.item.Items
-import net.minecraft.registry.RegistryKeys
-import net.minecraft.registry.RegistryWrapper
-import net.minecraft.registry.tag.ItemTags
+import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponents
+import net.minecraft.core.registries.Registries
+import net.minecraft.tags.ItemTags
+import net.minecraft.world.item.Items
 import java.util.concurrent.CompletableFuture
 
 /**
  * Generates Direbats item tags.
  */
-class DirebatsItemTagProvider(out: FabricDataOutput, registriesFuture: CompletableFuture<RegistryWrapper.WrapperLookup>) : FabricTagProvider.ItemTagProvider(out, registriesFuture) {
-    override fun configure(lookup: RegistryWrapper.WrapperLookup) {
+class DirebatsItemTagProvider(out: FabricDataOutput, registriesFuture: CompletableFuture<HolderLookup.Provider>) : FabricTagProvider.ItemTagProvider(out, registriesFuture) {
+    override fun addTags(lookup: HolderLookup.Provider) {
         builder(DirebatsItemTags.PICKED_UP_BY_DIREBAT)
             .forceAddTag(ItemTags.ARROWS)
             .forceAddTag(ConventionalItemTags.EMPTY_BUCKETS)
@@ -26,10 +26,10 @@ class DirebatsItemTagProvider(out: FabricDataOutput, registriesFuture: Completab
             .forceAddTag(ConventionalItemTags.FOODS)
             .forceAddTag(DirebatsItemTags.DIREBAT_PICKS_UP_EGG_ADVANCEMENT_ITEMS)
             .also { builder ->
-                lookup.getOrThrow(RegistryKeys.ITEM).streamEntries().forEach { entry ->
+                lookup.lookupOrThrow(Registries.ITEM).listElements().forEach { entry ->
                     val item = entry.value()
-                    if (item.components.contains(DataComponentTypes.TOOL)) {
-                        builder.add(entry.registryKey())
+                    if (item.components().has(DataComponents.TOOL)) {
+                        builder.add(entry.key())
                     }
                 }
             }

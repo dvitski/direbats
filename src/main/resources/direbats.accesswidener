@@ -1,11 +1,11 @@
 accessWidener v2 named
 
-accessible  method  net/minecraft/entity/passive/BatEntity                      isTodayAroundHalloween  ()Z
+accessible  method  net/minecraft/world/entity/ambient/Bat                      isHalloween  ()Z
 
-accessible  field   net/minecraft/entity/mob/MobEntity                          goalSelector            Lnet/minecraft/entity/ai/goal/GoalSelector;
-accessible  field   net/minecraft/entity/mob/MobEntity                          targetSelector          Lnet/minecraft/entity/ai/goal/GoalSelector;
+accessible  field   net/minecraft/world/entity/Mob                          goalSelector            Lnet/minecraft/world/entity/ai/goal/GoalSelector;
+accessible  field   net/minecraft/world/entity/Mob                          targetSelector          Lnet/minecraft/world/entity/ai/goal/GoalSelector;
 
-accessible  method  net/minecraft/entity/LivingEntity                           applyClimbingSpeed      (Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;
+accessible  method  net/minecraft/world/entity/LivingEntity                           handleOnClimbable      (Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;
 
-accessible  field   net/minecraft/item/ItemStack                                 item                   Lnet/minecraft/item/Item;
-mutable     field   net/minecraft/item/ItemStack                                 item                   Lnet/minecraft/item/Item;
+accessible  field   net/minecraft/world/item/ItemStack                                 item                   Lnet/minecraft/world/item/Item;
+mutable     field   net/minecraft/world/item/ItemStack                                 item                   Lnet/minecraft/world/item/Item;

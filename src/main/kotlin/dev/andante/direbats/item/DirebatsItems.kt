@@ -2,12 +2,12 @@ package dev.andante.direbats.item
 
 import dev.andante.direbats.Direbats
 import dev.andante.direbats.entity.DirebatsEntityTypes
-import net.minecraft.item.Item
-import net.minecraft.item.Items
-import net.minecraft.item.SpawnEggItem
-import net.minecraft.registry.RegistryKey
-import net.minecraft.registry.RegistryKeys
-import net.minecraft.util.Identifier
+import net.minecraft.core.registries.Registries
+import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.Items
+import net.minecraft.world.item.SpawnEggItem
 
 /**
  * Represents Direbats items.
@@ -28,9 +28,9 @@ object DirebatsItems {
      */
     val DIREBAT_FANG_ARROW = register("direbat_fang_arrow", ::DirebatFangArrowItem)
 
-    private fun register(id: String, factory: (Item.Settings) -> Item = ::Item, settings: Item.Settings = Item.Settings()): Item {
-        val identifier = Identifier.of(Direbats.MOD_ID, id)
-        val key = RegistryKey.of(RegistryKeys.ITEM, identifier)
-        return Items.register(key, factory, settings)
+    private fun register(id: String, factory: (Item.Properties) -> Item = ::Item, settings: Item.Properties = Item.Properties()): Item {
+        val identifier = ResourceLocation.fromNamespaceAndPath(Direbats.MOD_ID, id)
+        val key = ResourceKey.create(Registries.ITEM, identifier)
+        return Items.registerItem(key, factory, settings)
     }
 }

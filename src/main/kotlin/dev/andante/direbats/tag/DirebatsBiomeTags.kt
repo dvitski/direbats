@@ -1,10 +1,10 @@
 package dev.andante.direbats.tag
 
 import dev.andante.direbats.Direbats
-import net.minecraft.registry.RegistryKeys
-import net.minecraft.registry.tag.TagKey
-import net.minecraft.util.Identifier
-import net.minecraft.world.biome.Biome
+import net.minecraft.core.registries.Registries
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.tags.TagKey
+import net.minecraft.world.level.biome.Biome
 
 object DirebatsBiomeTags {
     /**
@@ -13,6 +13,6 @@ object DirebatsBiomeTags {
     val DIREBAT_CAN_SPAWN = register("direbat_can_spawn")
 
     private fun register(id: String): TagKey<Biome> {
-        return TagKey.of(RegistryKeys.BIOME, Identifier.of(Direbats.MOD_ID, id))
+        return TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(Direbats.MOD_ID, id))
     }
 }
