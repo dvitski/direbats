@@ -20,5 +20,8 @@ class DirebatsEntityTypeTagProvider(out: FabricPackOutput, registriesFuture: Com
 
         valueLookupBuilder(EntityTypeTags.ARROWS)
             .add(DirebatsEntityTypes.DIREBAT)
+
+        valueLookupBuilder(EntityTypeTags.BURN_IN_DAYLIGHT)
+            .add(DirebatsEntityTypes.DIREBAT)
     }
 }
