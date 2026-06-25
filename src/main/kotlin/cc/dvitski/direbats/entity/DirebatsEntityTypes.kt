@@ -1,6 +1,5 @@
 package cc.dvitski.direbats.entity
 
-import cc.dvitski.direbats.Direbats
 import cc.dvitski.direbats.item.DirebatsItems
 import cc.dvitski.direbats.tag.DirebatsBiomeTags
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications
@@ -27,7 +26,7 @@ object DirebatsEntityTypes {
      * Represents a Direbat entity.
      * @see [DirebatEntity]
      */
-    val DIREBAT: EntityType<DirebatEntity> = register("direbat",
+    val DIREBAT: EntityType<DirebatEntity> = register(DirebatsEntityTypeIds.DIREBAT,
         EntityType.Builder.of(::DirebatEntity, MobCategory.MONSTER)
             .eyeHeight(0.5f)
             .sized(0.95F, 0.9F)
@@ -38,7 +37,7 @@ object DirebatsEntityTypes {
      * Represents a Direbat Fang Arrow entity.
      * @see [DirebatFangArrowEntity]
      */
-    val DIREBAT_FANG_ARROW: EntityType<DirebatFangArrowEntity> = register("direbat_fang_arrow",
+    val DIREBAT_FANG_ARROW: EntityType<DirebatFangArrowEntity> = register(DirebatsEntityTypeIds.DIREBAT_FANG_ARROW,
         EntityType.Builder.of(::DirebatFangArrowEntity, MobCategory.MISC)
             .sized(0.5F, 0.5F)
             .clientTrackingRange(4)
@@ -52,9 +51,8 @@ object DirebatsEntityTypes {
         BiomeModifications.addSpawn(BiomeSelectors.tag(DirebatsBiomeTags.DIREBAT_CAN_SPAWN), MobCategory.MONSTER, DIREBAT, 36, 1, 3)
     }
 
-    private fun <T : Entity> register(id: String, builder: EntityType.Builder<T>): EntityType<T> {
-        val identifier = Identifier.fromNamespaceAndPath(Direbats.MOD_ID, id)
-        val key = ResourceKey.create(Registries.ENTITY_TYPE, identifier)
-        return Registry.register(BuiltInRegistries.ENTITY_TYPE, identifier, builder.build(key))
+    private fun <T : Entity> register(id: Identifier, builder: EntityType.Builder<T>): EntityType<T> {
+        val key = ResourceKey.create(Registries.ENTITY_TYPE, id)
+        return Registry.register(BuiltInRegistries.ENTITY_TYPE, id, builder.build(key))
     }
 }

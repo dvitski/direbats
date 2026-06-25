@@ -8,7 +8,7 @@
             "condition": "minecraft:entity_properties",
             "entity": "this",
             "predicate": {
-              "type": "direbats:direbat"
+              "minecraft:entity_type": "direbats:direbat"
             }
           }
         ],

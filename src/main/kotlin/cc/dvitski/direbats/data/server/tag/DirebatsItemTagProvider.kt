@@ -1,13 +1,14 @@
 package cc.dvitski.direbats.data.server.tag
 
-import cc.dvitski.direbats.item.DirebatsItems
+import cc.dvitski.direbats.item.DirebatsItemIds
 import cc.dvitski.direbats.tag.DirebatsItemTags
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags
 import net.minecraft.core.HolderLookup
+import net.minecraft.references.BlockItemIds
+import net.minecraft.references.ItemIds
 import net.minecraft.tags.ItemTags
-import net.minecraft.world.item.Items
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -15,7 +16,7 @@ import java.util.concurrent.CompletableFuture
  */
 class DirebatsItemTagProvider(out: FabricPackOutput, registriesFuture: CompletableFuture<HolderLookup.Provider>) : FabricTagsProvider.ItemTagsProvider(out, registriesFuture) {
     override fun addTags(lookup: HolderLookup.Provider) {
-        valueLookupBuilder(DirebatsItemTags.PICKED_UP_BY_DIREBAT)
+        builder(DirebatsItemTags.PICKED_UP_BY_DIREBAT)
             .forceAddTag(ItemTags.ARROWS)
             .forceAddTag(ConventionalItemTags.EMPTY_BUCKETS)
             .forceAddTag(ConventionalItemTags.WATER_BUCKETS)
@@ -25,50 +26,50 @@ class DirebatsItemTagProvider(out: FabricPackOutput, registriesFuture: Completab
             .forceAddTag(DirebatsItemTags.DIREBAT_PICKS_UP_EGG_ADVANCEMENT_ITEMS)
             .also { builder ->
                 builder.add(
-                    Items.WOODEN_SWORD,
-                    Items.WOODEN_SHOVEL,
-                    Items.WOODEN_PICKAXE,
-                    Items.WOODEN_AXE,
-                    Items.WOODEN_HOE,
-                    Items.STONE_SWORD,
-                    Items.STONE_SHOVEL,
-                    Items.STONE_PICKAXE,
-                    Items.STONE_AXE,
-                    Items.STONE_HOE,
-                    Items.GOLDEN_SWORD,
-                    Items.GOLDEN_SHOVEL,
-                    Items.GOLDEN_PICKAXE,
-                    Items.GOLDEN_AXE,
-                    Items.GOLDEN_HOE,
-                    Items.IRON_SWORD,
-                    Items.IRON_SHOVEL,
-                    Items.IRON_PICKAXE,
-                    Items.IRON_AXE,
-                    Items.IRON_HOE,
-                    Items.DIAMOND_SWORD,
-                    Items.DIAMOND_SHOVEL,
-                    Items.DIAMOND_PICKAXE,
-                    Items.DIAMOND_AXE,
-                    Items.DIAMOND_HOE,
-                    Items.NETHERITE_SWORD,
-                    Items.NETHERITE_SHOVEL,
-                    Items.NETHERITE_PICKAXE,
-                    Items.NETHERITE_AXE,
-                    Items.NETHERITE_HOE,
-                    Items.SHEARS,
-                    Items.MACE,
-                    Items.TRIDENT,
+                    ItemIds.WOODEN_SWORD,
+                    ItemIds.WOODEN_SHOVEL,
+                    ItemIds.WOODEN_PICKAXE,
+                    ItemIds.WOODEN_AXE,
+                    ItemIds.WOODEN_HOE,
+                    ItemIds.STONE_SWORD,
+                    ItemIds.STONE_SHOVEL,
+                    ItemIds.STONE_PICKAXE,
+                    ItemIds.STONE_AXE,
+                    ItemIds.STONE_HOE,
+                    ItemIds.GOLDEN_SWORD,
+                    ItemIds.GOLDEN_SHOVEL,
+                    ItemIds.GOLDEN_PICKAXE,
+                    ItemIds.GOLDEN_AXE,
+                    ItemIds.GOLDEN_HOE,
+                    ItemIds.IRON_SWORD,
+                    ItemIds.IRON_SHOVEL,
+                    ItemIds.IRON_PICKAXE,
+                    ItemIds.IRON_AXE,
+                    ItemIds.IRON_HOE,
+                    ItemIds.DIAMOND_SWORD,
+                    ItemIds.DIAMOND_SHOVEL,
+                    ItemIds.DIAMOND_PICKAXE,
+                    ItemIds.DIAMOND_AXE,
+                    ItemIds.DIAMOND_HOE,
+                    ItemIds.NETHERITE_SWORD,
+                    ItemIds.NETHERITE_SHOVEL,
+                    ItemIds.NETHERITE_PICKAXE,
+                    ItemIds.NETHERITE_AXE,
+                    ItemIds.NETHERITE_HOE,
+                    ItemIds.SHEARS,
+                    ItemIds.MACE,
+                    ItemIds.TRIDENT,
                 )
             }
 
-        valueLookupBuilder(DirebatsItemTags.DIREBAT_PICKS_UP_EGG_ADVANCEMENT_ITEMS).add(
-            Items.EGG,
-            Items.DRAGON_EGG,
-            Items.TURTLE_EGG
+        builder(DirebatsItemTags.DIREBAT_PICKS_UP_EGG_ADVANCEMENT_ITEMS).add(
+            ItemIds.EGG,
+            BlockItemIds.DRAGON_EGG.item,
+            BlockItemIds.TURTLE_EGG.item,
         )
 
-        valueLookupBuilder(ItemTags.ARROWS).add(
-            DirebatsItems.DIREBAT_FANG_ARROW
+        builder(ItemTags.ARROWS).add(
+            DirebatsItemIds.DIREBAT_FANG_ARROW
         )
     }
 }

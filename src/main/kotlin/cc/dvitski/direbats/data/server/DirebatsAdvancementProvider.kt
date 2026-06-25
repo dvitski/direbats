@@ -10,10 +10,10 @@ import net.minecraft.advancements.Advancement
 import net.minecraft.advancements.AdvancementHolder
 import net.minecraft.advancements.AdvancementType
 import net.minecraft.advancements.DisplayInfo
-import net.minecraft.advancements.criterion.ContextAwarePredicate
-import net.minecraft.advancements.criterion.EntityPredicate
-import net.minecraft.advancements.criterion.ItemPredicate
-import net.minecraft.advancements.criterion.PickedUpItemTrigger
+import net.minecraft.advancements.predicates.ContextAwarePredicate
+import net.minecraft.advancements.predicates.ItemPredicate
+import net.minecraft.advancements.predicates.entity.EntityPredicate
+import net.minecraft.advancements.triggers.PickedUpItemTrigger
 import net.minecraft.core.HolderLookup
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
@@ -43,7 +43,7 @@ class DirebatsAdvancementProvider(out: FabricPackOutput, lookup: CompletableFutu
             .addCriterion(
                 "pick_up_egg",
                 PickedUpItemTrigger.TriggerInstance.thrownItemPickedUpByEntity(
-                    ContextAwarePredicate.create(),
+                    Optional.of(ContextAwarePredicate.create()),
                     Optional.of(
                         ItemPredicate.Builder.item()
                             .of(lookup.lookupOrThrow(Registries.ITEM), DirebatsItemTags.DIREBAT_PICKS_UP_EGG_ADVANCEMENT_ITEMS)
