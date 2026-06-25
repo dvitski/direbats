@@ -6,7 +6,7 @@ pluginManagement {
     }
 
     plugins {
-        id("fabric-loom").version(settings.extra["loom_version"] as String)
+        id("net.fabricmc.fabric-loom").version(settings.extra["loom_version"] as String)
         kotlin("jvm").version(System.getProperty("kotlin_version"))
     }
 }

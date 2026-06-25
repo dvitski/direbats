@@ -23,19 +23,19 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "dev.andante.direbats.Direbats"
+        "value": "cc.dvitski.direbats.Direbats"
       }
     ],
     "client": [
       {
         "adapter": "kotlin",
-        "value": "dev.andante.direbats.client.DirebatsClient"
+        "value": "cc.dvitski.direbats.client.DirebatsClient"
       }
     ],
     "fabric-datagen": [
       {
         "adapter": "kotlin",
-        "value": "dev.andante.direbats.data.DirebatsDataGeneration"
+        "value": "cc.dvitski.direbats.data.DirebatsDataGeneration"
       }
     ]
   },
@@ -43,6 +43,6 @@
   "depends": {
     "fabric-api": "*",
     "fabric-language-kotlin": "*",
-    "minecraft": ">=1.21"
+    "minecraft": ">=26.1"
   }
 }

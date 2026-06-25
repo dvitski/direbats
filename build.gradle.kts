@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm").version(System.getProperty("kotlin_version"))
 
-    id("fabric-loom")
+    id("net.fabricmc.fabric-loom")
     id("me.modmuss50.mod-publish-plugin") version "2.0.1"
 }
 
@@ -13,7 +13,6 @@ version = "${extra["mod_version"]}+$versionMinecraft"
 group = extra["maven_group"] as String
 
 val modId = extra["mod_id"] as String
-val versionYarn = extra["yarn_build"] as String
 val versionJava = extra["java_version"] as String
 val versionLoader = extra["loader_version"] as String
 val versionFabricApi = extra["fabric_version"] as String
@@ -21,10 +20,9 @@ val versionFabricKotlin = extra["fabric_language_kotlin_version"] as String
 
 dependencies {
     minecraft("com.mojang", "minecraft", versionMinecraft)
-    mappings(loom.officialMojangMappings())
-    modImplementation("net.fabricmc", "fabric-loader", versionLoader)
-    modImplementation("net.fabricmc.fabric-api", "fabric-api", versionFabricApi)
-    include(modImplementation("net.fabricmc", "fabric-language-kotlin", versionFabricKotlin))
+    implementation("net.fabricmc", "fabric-loader", versionLoader)
+    implementation("net.fabricmc.fabric-api", "fabric-api", versionFabricApi)
+    include(implementation("net.fabricmc", "fabric-language-kotlin", versionFabricKotlin))
 }
 
 tasks {
@@ -66,24 +64,16 @@ loom {
 
     runs {
         create("Data Generation") {
-            server()
-
-            vmArg("-Dfabric-api.datagen")
-            vmArg("-Dfabric-api.datagen.output-dir=${file(generatedResourcesDir)}")
-            vmArg("-Dfabric-api.datagen.modid=$modId")
-
-            runDir("build/datagen")
-        }
-
-        create("Data Generation Client") {
             client()
 
-            vmArg("-Dfabric-api.datagen")
-            vmArg("-Dfabric-api.datagen.output-dir=${file(generatedResourcesDir)}")
-            vmArg("-Dfabric-api.datagen.modid=$modId")
+            jvmArguments.addAll(
+                "-Dfabric-api.datagen",
+                "-Dfabric-api.datagen.output-dir=${file(generatedResourcesDir)}",
+                "-Dfabric-api.datagen.modid=$modId",
+            )
 
-            runDir("build/datagen")
-            source(sourceSets["client"])
+            runDirectory.set(file("build/datagen"))
+            sourceSet.set(sourceSets["client"].name)
         }
     }
 }
