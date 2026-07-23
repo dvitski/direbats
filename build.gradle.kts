@@ -97,7 +97,7 @@ sourceSets.main {
 /* Releasing */
 
 publishMods {
-    file.set(tasks.jar.flatMap { it.archiveFile })
+    file.set(tasks.remapJar.flatMap { it.archiveFile })
 
     version.set(project.version.toString())
     type.set(STABLE)
