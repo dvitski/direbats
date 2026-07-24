@@ -8,7 +8,7 @@
             "condition": "minecraft:entity_properties",
             "entity": "this",
             "predicate": {
-              "minecraft:entity_type": "direbats:direbat"
+              "type": "direbats:direbat"
             }
           }
         ],
@@ -26,6 +26,7 @@
     },
     "frame": "challenge",
     "icon": {
+      "count": 1,
       "id": "minecraft:egg"
     },
     "title": {

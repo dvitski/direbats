@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm").version(System.getProperty("kotlin_version"))
 
-    id("net.fabricmc.fabric-loom")
+    id("fabric-loom")
     id("me.modmuss50.mod-publish-plugin") version "2.0.1"
 }
 
@@ -20,9 +20,10 @@ val versionFabricKotlin = extra["fabric_language_kotlin_version"] as String
 
 dependencies {
     minecraft("com.mojang", "minecraft", versionMinecraft)
-    implementation("net.fabricmc", "fabric-loader", versionLoader)
-    implementation("net.fabricmc.fabric-api", "fabric-api", versionFabricApi)
-    include(implementation("net.fabricmc", "fabric-language-kotlin", versionFabricKotlin))
+    mappings(loom.officialMojangMappings())
+    modImplementation("net.fabricmc", "fabric-loader", versionLoader)
+    modImplementation("net.fabricmc.fabric-api", "fabric-api", versionFabricApi)
+    include(modImplementation("net.fabricmc", "fabric-language-kotlin", versionFabricKotlin))
 }
 
 tasks {
@@ -66,14 +67,12 @@ loom {
         create("Data Generation") {
             client()
 
-            jvmArguments.addAll(
-                "-Dfabric-api.datagen",
-                "-Dfabric-api.datagen.output-dir=${file(generatedResourcesDir)}",
-                "-Dfabric-api.datagen.modid=$modId",
-            )
+            vmArg("-Dfabric-api.datagen")
+            vmArg("-Dfabric-api.datagen.output-dir=${file(generatedResourcesDir)}")
+            vmArg("-Dfabric-api.datagen.modid=$modId")
 
-            runDirectory.set(file("build/datagen"))
-            sourceSet.set(sourceSets["client"].name)
+            runDir("build/datagen")
+            source(sourceSets["client"])
         }
     }
 }
@@ -87,7 +86,7 @@ sourceSets.main {
 /* Releasing */
 
 publishMods {
-    file.set(tasks.jar.flatMap { it.archiveFile })
+    file.set(tasks.remapJar.flatMap { it.archiveFile })
 
     version.set(project.version.toString())
     type.set(STABLE)

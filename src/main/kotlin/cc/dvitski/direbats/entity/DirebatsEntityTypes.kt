@@ -7,9 +7,7 @@ import net.fabricmc.fabric.api.biome.v1.BiomeSelectors
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricDefaultAttributeRegistry
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.core.registries.Registries
-import net.minecraft.resources.Identifier
-import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.MobCategory
@@ -30,7 +28,6 @@ object DirebatsEntityTypes {
         EntityType.Builder.of(::DirebatEntity, MobCategory.MONSTER)
             .eyeHeight(0.5f)
             .sized(0.95F, 0.9F)
-            .notInPeaceful()
     )
 
     /**
@@ -51,8 +48,7 @@ object DirebatsEntityTypes {
         BiomeModifications.addSpawn(BiomeSelectors.tag(DirebatsBiomeTags.DIREBAT_CAN_SPAWN), MobCategory.MONSTER, DIREBAT, 36, 1, 3)
     }
 
-    private fun <T : Entity> register(id: Identifier, builder: EntityType.Builder<T>): EntityType<T> {
-        val key = ResourceKey.create(Registries.ENTITY_TYPE, id)
-        return Registry.register(BuiltInRegistries.ENTITY_TYPE, id, builder.build(key))
+    private fun <T : Entity> register(id: ResourceLocation, builder: EntityType.Builder<T>): EntityType<T> {
+        return Registry.register(BuiltInRegistries.ENTITY_TYPE, id, builder.build(id.path))
     }
 }

@@ -3,7 +3,7 @@ package cc.dvitski.direbats.sound
 import cc.dvitski.direbats.entity.DirebatsEntityTypes
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.resources.Identifier
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.world.entity.EntityType
 
@@ -19,7 +19,7 @@ object DirebatsSoundEvents {
 
     private fun registerEntity(entity: EntityType<*>, id: String): SoundEvent {
         val identifier = BuiltInRegistries.ENTITY_TYPE.getKey(entity)
-        val soundIdentifier = Identifier.fromNamespaceAndPath(identifier.namespace, "entity.${identifier.path}.$id")
-        return Registry.register(BuiltInRegistries.SOUND_EVENT, soundIdentifier, SoundEvent.createVariableRangeEvent(soundIdentifier))
+        val soundResourceLocation = ResourceLocation.fromNamespaceAndPath(identifier.namespace, "entity.${identifier.path}.$id")
+        return Registry.register(BuiltInRegistries.SOUND_EVENT, soundResourceLocation, SoundEvent.createVariableRangeEvent(soundResourceLocation))
     }
 }

@@ -6,18 +6,18 @@ import cc.dvitski.direbats.data.DirebatsSubtitleNames
 import cc.dvitski.direbats.entity.DirebatsEntityTypes
 import cc.dvitski.direbats.item.DirebatsItems
 import cc.dvitski.direbats.world.DirebatsGameRules
-import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider
 import net.minecraft.core.HolderLookup
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.world.entity.EntityType
-import net.minecraft.world.level.gamerules.GameRule
+import net.minecraft.world.level.GameRules
 import java.util.concurrent.CompletableFuture
 
 /**
  * Generates Direbats language files.
  */
-class DirebatsLanguageProvider(out: FabricPackOutput, lookup: CompletableFuture<HolderLookup.Provider>) : FabricLanguageProvider(out, lookup) {
+class DirebatsLanguageProvider(out: FabricDataOutput, lookup: CompletableFuture<HolderLookup.Provider>) : FabricLanguageProvider(out, lookup) {
     override fun generateTranslations(lookup: HolderLookup.Provider, builder: TranslationBuilder) {
         builder.add("itemGroup.${Direbats.MOD_ID}.all", Direbats.MOD_NAME)
 
@@ -42,7 +42,7 @@ class DirebatsLanguageProvider(out: FabricPackOutput, lookup: CompletableFuture<
     }
 
     companion object {
-        fun TranslationBuilder.add(rule: GameRule<*>, value: String) {
+        fun TranslationBuilder.add(rule: GameRules.Key<*>, value: String) {
             return add(rule.descriptionId, value)
         }
 

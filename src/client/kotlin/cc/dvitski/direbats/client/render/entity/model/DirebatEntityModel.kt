@@ -6,11 +6,10 @@ import cc.dvitski.direbats.client.render.entity.model.DirebatsEntityModelPartNam
 import cc.dvitski.direbats.client.render.entity.model.DirebatsEntityModelPartNames.RIGHT_WING_OUTER
 import cc.dvitski.direbats.client.render.entity.model.DirebatsEntityModelPartNames.TAILBONE
 import cc.dvitski.direbats.client.render.entity.model.DirebatsEntityModelPartNames.TALONS
-import cc.dvitski.direbats.client.render.entity.state.DirebatEntityRenderState
 import cc.dvitski.direbats.entity.DirebatEntity
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.model.EntityModel
+import net.minecraft.client.model.HierarchicalModel
 import net.minecraft.client.model.geom.ModelPart
 import net.minecraft.client.model.geom.PartNames.BODY
 import net.minecraft.client.model.geom.PartNames.HEAD
@@ -27,7 +26,7 @@ import net.minecraft.util.Mth
  */
 @Suppress("unused")
 @Environment(EnvType.CLIENT)
-class DirebatEntityModel(root: ModelPart) : EntityModel<DirebatEntityRenderState>(root) {
+class DirebatEntityModel(private val root: ModelPart) : HierarchicalModel<DirebatEntity>() {
     private val body: ModelPart = root.getChild(BODY)
     private val leftWing: ModelPart = body.getChild(LEFT_WING)
     private val leftWingOuter: ModelPart = leftWing.getChild(LEFT_WING_OUTER)
@@ -39,9 +38,16 @@ class DirebatEntityModel(root: ModelPart) : EntityModel<DirebatEntityRenderState
     val head: ModelPart = root.getChild(HEAD)
     private val fangs: ModelPart = head.getChild(FANGS)
 
-    override fun setupAnim(state: DirebatEntityRenderState) {
-        if (state.hanging) {
-            head.xRot = state.xRot * (Math.PI.toFloat() / 180f)
+    override fun setupAnim(
+        entity: DirebatEntity,
+        limbSwing: Float,
+        limbSwingAmount: Float,
+        ageInTicks: Float,
+        netHeadYaw: Float,
+        headPitch: Float
+    ) {
+        if (entity.hanging) {
+            head.xRot = headPitch * (Math.PI.toFloat() / 180f)
             body.xRot = 0.0f
             rightWing.xRot = 0.0f
             leftWing.xRot = 0.0f
@@ -50,16 +56,17 @@ class DirebatEntityModel(root: ModelPart) : EntityModel<DirebatEntityRenderState
             leftWingOuter.yRot = 90.0f
             rightWingOuter.yRot = -leftWingOuter.yRot
         } else {
-            head.xRot = state.xRot * (Math.PI / 180).toFloat()
-            head.yRot = state.yRot * (Math.PI / 180).toFloat()
-            val animationProgress = state.ageInTicks
-            body.xRot = (Math.PI / 4).toFloat() + Mth.cos(animationProgress * 0.1) * 0.15f
-            rightWing.yRot = Mth.cos(animationProgress * 0.4) * Math.PI.toFloat() * 0.4f
+            head.xRot = headPitch * (Math.PI / 180).toFloat()
+            head.yRot = netHeadYaw * (Math.PI / 180).toFloat()
+            body.xRot = (Math.PI / 4).toFloat() + Mth.cos(ageInTicks * 0.1f) * 0.15f
+            rightWing.yRot = Mth.cos(ageInTicks * 0.4f) * Math.PI.toFloat() * 0.4f
             leftWing.yRot = -rightWing.yRot
             rightWingOuter.yRot = rightWing.yRot * 0.5f
             leftWingOuter.yRot = leftWing.yRot * 0.5f
         }
     }
+
+    override fun root(): ModelPart = root
 
     companion object {
         @Suppress("UNUSED_VARIABLE")

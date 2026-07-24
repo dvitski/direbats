@@ -7,7 +7,7 @@ import cc.dvitski.direbats.entity.DirebatsEntityTypes
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.renderer.entity.EntityRenderers
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 
 @Environment(EnvType.CLIENT)
 object DirebatsClient : ClientModInitializer {
@@ -18,7 +18,7 @@ object DirebatsClient : ClientModInitializer {
     private fun registerEntityRenderers() {
         DirebatsEntityModelLayers
 
-        EntityRenderers.register(DirebatsEntityTypes.DIREBAT, ::DirebatEntityRenderer)
-        EntityRenderers.register(DirebatsEntityTypes.DIREBAT_FANG_ARROW, ::DirebatFangArrowEntityRenderer)
+        EntityRendererRegistry.register(DirebatsEntityTypes.DIREBAT, ::DirebatEntityRenderer)
+        EntityRendererRegistry.register(DirebatsEntityTypes.DIREBAT_FANG_ARROW, ::DirebatFangArrowEntityRenderer)
     }
 }

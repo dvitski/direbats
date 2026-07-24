@@ -3,18 +3,16 @@ package cc.dvitski.direbats.entity
 import cc.dvitski.direbats.item.DirebatsItems
 import cc.dvitski.direbats.tag.DirebatsEntityTypeTags
 import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.core.particles.SpellParticleOption
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.ai.goal.Goal
-import net.minecraft.world.entity.projectile.arrow.AbstractArrow
+import net.minecraft.world.entity.projectile.AbstractArrow
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
-import net.minecraft.world.level.storage.ValueInput
-import net.minecraft.world.level.storage.ValueOutput
 
 /**
  * Represents a Direbat Fang Arrow entity.
@@ -30,7 +28,7 @@ class DirebatFangArrowEntity : AbstractArrow {
         super.tick()
 
         if (level().isClientSide) {
-            if (isInGround) {
+            if (inGround) {
                 if (inGroundTime % 5 == 0) {
                     spawnParticles(1)
                 }
@@ -42,14 +40,14 @@ class DirebatFangArrowEntity : AbstractArrow {
 
     private fun spawnParticles(amount: Int) {
         (0 until amount).forEach { _ ->
-            level().addParticle(SpellParticleOption.create(ParticleTypes.INSTANT_EFFECT, 0xEFE3DC, 1.0f), x, y, z, 0.0, 0.0, 0.0)
+            level().addParticle(ParticleTypes.INSTANT_EFFECT, x, y, z, 0.0, 0.0, 0.0)
         }
     }
 
     override fun doPostHurtEffects(target: LivingEntity) {
         super.doPostHurtEffects(target)
 
-        if (!target.`is`(DirebatsEntityTypeTags.DIREBAT_FANG_ARROW_EFFECTS_IMMUNE)) {
+        if (!target.type.`is`(DirebatsEntityTypeTags.DIREBAT_FANG_ARROW_EFFECTS_IMMUNE)) {
             // blind
             target.addEffect(MobEffectInstance(MobEffects.BLINDNESS, duration, 0), this.effectSource)
 
@@ -74,14 +72,14 @@ class DirebatFangArrowEntity : AbstractArrow {
 
     /* NBT */
 
-    override fun addAdditionalSaveData(view: ValueOutput) {
-        super.addAdditionalSaveData(view)
-        view.putInt(DURATION_KEY, duration)
+    override fun addAdditionalSaveData(nbt: CompoundTag) {
+        super.addAdditionalSaveData(nbt)
+        nbt.putInt(DURATION_KEY, duration)
     }
 
-    override fun readAdditionalSaveData(view: ValueInput) {
-        super.readAdditionalSaveData(view)
-        duration = view.getIntOr(DURATION_KEY, 300)
+    override fun readAdditionalSaveData(nbt: CompoundTag) {
+        super.readAdditionalSaveData(nbt)
+        duration = if (nbt.contains(DURATION_KEY)) nbt.getInt(DURATION_KEY) else 300
     }
 
     companion object {
